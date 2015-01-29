@@ -1,4 +1,4 @@
-package RDF::QueryX::Role::Predicter;
+package RDF::QueryX::Cache::Role::Predicter;
 
 use strict;
 use warnings;

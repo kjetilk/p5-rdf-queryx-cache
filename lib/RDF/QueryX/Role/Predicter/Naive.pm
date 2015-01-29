@@ -1,11 +1,11 @@
-package RDF::QueryX::Role::Predicter::Naive;
+package RDF::QueryX::Cache::Role::Predicter::Naive;
 
 use strict;
 use warnings;
 
 use Moo::Role;
 
-with 'RDF::QueryX::Role::Predicter';
+with 'RDF::QueryX::Cache::Role::Predicter';
 
 sub digest {
 	return "foo";

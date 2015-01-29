@@ -31,13 +31,13 @@ use Moo::Role;
 	sub new { return bless {}, 'Tmp::Test'}; 
 }
 
-my $class = "Moo::Role"->create_class_with_roles('Tmp::Test', 'RDF::QueryX::Role::Predicter::Naive');
+my $class = "Moo::Role"->create_class_with_roles('Tmp::Test', 'RDF::QueryX::Cache::Role::Predicter::Naive');
 
 my $naive = $class->new(query => 'FOO');
 
-does_ok($naive, 'RDF::QueryX::Role::Predicter');
+does_ok($naive, 'RDF::QueryX::Cache::Role::Predicter');
 has_attribute_ok($naive, 'query');
-can_ok('RDF::QueryX::Role::Predicter::Naive', 'digest');
+can_ok('RDF::QueryX::Cache::Role::Predicter::Naive', 'digest');
 
 
 
