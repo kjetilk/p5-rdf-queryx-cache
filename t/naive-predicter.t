@@ -28,14 +28,15 @@ use Moo::Role;
 
 {
 	package Tmp::Test;
-	sub new { return bless {}, 'Tmp::Test'}; 
+	use Moo;
+	with 'RDF::QueryX::Cache::Role::Predicter::Naive';
 }
 
-my $class = "Moo::Role"->create_class_with_roles('Tmp::Test', 'RDF::QueryX::Cache::Role::Predicter::Naive');
+my $naive = Tmp::Test->new(query => 'FOO');
 
-my $naive = $class->new(query => 'FOO');
 
 does_ok($naive, 'RDF::QueryX::Cache::Role::Predicter');
+does_ok($naive, 'RDF::QueryX::Cache::Role::Predicter::Naive');
 has_attribute_ok($naive, 'query');
 can_ok('RDF::QueryX::Cache::Role::Predicter::Naive', 'digest');
 
