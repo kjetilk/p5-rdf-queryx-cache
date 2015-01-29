@@ -31,8 +31,9 @@ use Moo::Role;
 	sub new { return bless {}, 'Tmp::Test'}; 
 }
 
-my $naive = Tmp::Test->new;
-"Moo::Role"->apply_roles_to_object($naive, 'RDF::QueryX::Role::Predicter::Naive');
+my $class = "Moo::Role"->create_class_with_roles('Tmp::Test', 'RDF::QueryX::Role::Predicter::Naive');
+
+my $naive = $class->new(query => 'FOO');
 
 does_ok($naive, 'RDF::QueryX::Role::Predicter');
 has_attribute_ok($naive, 'query');

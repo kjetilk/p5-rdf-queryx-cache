@@ -5,4 +5,6 @@ use warnings;
 
 use Moo::Role;
 
+with 'RDF::QueryX::Role::Predicter';
+
 1;
