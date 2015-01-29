@@ -23,6 +23,22 @@ the same terms as the Perl 5 programming language system itself.
 use strict;
 use warnings;
 use Test::More;
+use Test::Moose;
+use Moo::Role;
+
+{
+	package Tmp::Test;
+	sub new { return bless {}, 'Tmp::Test'}; 
+}
+
+my $naive = Tmp::Test->new;
+"Moo::Role"->apply_roles_to_object($naive, 'RDF::QueryX::Role::Predicter::Naive');
+
+does_ok($naive, 'RDF::QueryX::Role::Predicter');
+has_attribute_ok($naive, 'query');
+can_ok('RDF::QueryX::Role::Predicter::Naive', 'digest');
+
+
 
 done_testing;
 
