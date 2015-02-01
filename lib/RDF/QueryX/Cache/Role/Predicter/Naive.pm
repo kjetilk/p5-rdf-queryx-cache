@@ -32,7 +32,7 @@ sub analyze {
 		if ($count == $self->threshold) { # Fails if two clients are updating at the same time
 			my $push = { 'myquery' => 'CONSTRUCT WHERE { ' . $quad->as_sparql . ' }',
 							 'endpoint' => ''};
-			$self->store->publish('prefetch.queries', encode_json($push));
+			$self->pubsub->publish('prefetch.queries', encode_json($push));
 		}
 
 	}

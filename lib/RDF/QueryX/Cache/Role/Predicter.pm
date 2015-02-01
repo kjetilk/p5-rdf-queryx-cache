@@ -33,6 +33,11 @@ has store => (is => 'ro',
 				  required => 1
 				 );
 
+has pubsub => (is => 'ro',
+				  isa => InstanceOf['Redis::Fast'],
+				  required => 1
+				 );
+
 has cache => (is => 'ro',
 				  isa => InstanceOf['CHI::Driver'],
 				  required => 1
