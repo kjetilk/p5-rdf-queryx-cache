@@ -43,8 +43,8 @@ has cache => (is => 'ro',
 				  required => 1
 				 );
 
-has localtriples  => (is => 'rw', isa => ArrayRef['RDF::Query::Algebra::Quad'], handles_via => 'Array');
-has remotetriples => (is => 'rw', isa => ArrayRef['RDF::Query::Algebra::Quad'], handles_via => 'Array');
+has localtriples  => (is => 'rw', isa => ArrayRef, handles_via => 'Array');
+has remotetriples => (is => 'rw', isa => ArrayRef, handles_via => 'Array');
 
 
 requires 'digest';

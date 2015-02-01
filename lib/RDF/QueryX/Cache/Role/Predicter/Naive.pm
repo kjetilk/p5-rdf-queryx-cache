@@ -38,7 +38,7 @@ sub analyze {
 	}
 }
 
-has threshold ( is => 'rw', isa => Int, default => sub { 3 });
+has threshold => ( is => 'rw', isa => Int, default => sub { 3 });
 
 
 sub digest {

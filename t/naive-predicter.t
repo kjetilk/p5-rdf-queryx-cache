@@ -38,7 +38,9 @@ my $naive = Tmp::Test->new(query => 'FOO');
 does_ok($naive, 'RDF::QueryX::Cache::Role::Predicter');
 does_ok($naive, 'RDF::QueryX::Cache::Role::Predicter::Naive');
 has_attribute_ok($naive, 'query');
+has_attribute_ok($naive, 'threshold');
 can_ok('RDF::QueryX::Cache::Role::Predicter::Naive', 'digest');
+can_ok('RDF::QueryX::Cache::Role::Predicter::Naive', 'analyze');
 
 
 
