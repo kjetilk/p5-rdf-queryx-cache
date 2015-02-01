@@ -25,6 +25,19 @@ use warnings;
 use Test::More;
 use Test::Moose;
 use Moo::Role;
+use Redis;
+use Test::RedisServer;
+
+
+my $redis_server;
+eval {
+	$redis_server = Test::RedisServer->new;
+} or plan skip_all => 'redis-server is required to this test';
+
+my $redis1 = Redis->new( $redis_server->connect_info );
+my $redis2 = Redis->new( $redis_server->connect_info );
+ 
+is $redis1->ping, 'PONG', 'Redis ping pong ok';
 
 {
 	package Tmp::Test;
