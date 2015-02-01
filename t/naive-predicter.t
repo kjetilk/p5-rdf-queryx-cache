@@ -42,5 +42,7 @@ can_ok('RDF::QueryX::Cache::Role::Predicter::Naive', 'digest');
 
 
 
+
+
 done_testing;
 

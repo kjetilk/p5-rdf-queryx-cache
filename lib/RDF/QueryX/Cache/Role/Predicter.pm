@@ -4,7 +4,9 @@ use strict;
 use warnings;
 
 use Moo::Role;
-use Types::Standard qw(InstanceOf Str Bool Maybe Int HashRef);
+use Types::Standard qw(InstanceOf Str Int ArrayRef);
+use MooX::HandlesVia;
+
 use RDF::Query;
 
 has query => (is => 'ro', 
@@ -12,6 +14,7 @@ has query => (is => 'ro',
 				  builder => '_build_query',
 				  required => 1
 				 );
+
 
 sub _build_query {
 	my ($self, $query) = @_;
@@ -22,7 +25,25 @@ sub _build_query {
 	}
 }
 
+has remoteendpoint => (is => 'ro', isa => Str, required => 1);
+
+
+has store => (is => 'ro',
+				  isa => InstanceOf['CHI::Driver'],
+				  required => 1
+				 );
+
+has cache => (is => 'ro',
+				  isa => InstanceOf['CHI::Driver'],
+				  required => 1
+				 );
+
+has localtriples  => (is => 'rw', isa => ArrayRef['RDF::Query::Algebra::Quad'], handles_via => 'Array');
+has remotetriples => (is => 'rw', isa => ArrayRef['RDF::Query::Algebra::Quad'], handles_via => 'Array');
+
+
 requires 'digest';
+requires 'threshold';
 #requires '';
 
 1;
