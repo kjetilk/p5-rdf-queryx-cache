@@ -25,7 +25,8 @@ use warnings;
 use Test::More;
 use Test::Moose;
 use Moo::Role;
-use Redis;
+use Redis::Fast;
+use CHI;
 use Test::RedisServer;
 
 
@@ -34,8 +35,8 @@ eval {
 	$redis_server = Test::RedisServer->new;
 } or plan skip_all => 'redis-server is required to this test';
 
-my $redis1 = Redis->new( $redis_server->connect_info );
-my $redis2 = Redis->new( $redis_server->connect_info );
+my $redis1 = Redis::Fast->new( $redis_server->connect_info );
+my $redis2 = Redis::Fast->new( $redis_server->connect_info );
  
 is $redis1->ping, 'PONG', 'Redis ping pong ok';
 
@@ -45,7 +46,10 @@ is $redis1->ping, 'PONG', 'Redis ping pong ok';
 	with 'RDF::QueryX::Cache::Role::Predicter::Naive';
 }
 
-my $naive = Tmp::Test->new(query => 'FOO');
+my $naive = Tmp::Test->new(query => 'FOO',
+									cache => CHI->new( driver => 'Memory', global => 1 ),
+									pubsub => $redis1, store => $redis2,
+									remoteendpoint => 'http://localhost/');
 
 
 does_ok($naive, 'RDF::QueryX::Cache::Role::Predicter');
