@@ -7,6 +7,7 @@ use Moo::Role;
 use Types::Standard qw(Int);
 
 use RDF::Query;
+use JSON::XS;
 
 with 'RDF::QueryX::Cache::Role::Predicter';
 
@@ -25,19 +26,19 @@ sub analyze {
 
 		next unless ($key);
 
-		# Then, update the storage so that the cache manager can deal with prefetches
-		my $data = $self->store->get($key);
-		$data->{score}++;
-		$data->{threshold} = $self->threshold;
-		$data->{myquery} = 'CONSTRUCT WHERE { ' . $quad->as_sparql . ' }';
-		$self->store->set($key, $data, 'never');
-	}
+		# Then, update the storage and push an event so that the cache manager can deal with prefetches
+		$self->store->incr($key);
+		my $count = $self->store->get($key);
+		if ($count == $self->threshold) { # Fails if two clients are updating at the same time
+			my $push = { 'myquery' => 'CONSTRUCT WHERE { ' . $quad->as_sparql . ' }',
+							 'endpoint' => '');
+			$self->store->publish('prefetch.queries', encode_json($push));
+		}
 
-#	die Data::Dumper::Dumper($qo->parsed);
+	}
 }
 
 has threshold ( is => 'rw', isa => Int, default => sub { 3 });
-#has myquery ( is => 'rw', isa => Str, default => sub { 3 });
 
 
 sub digest {

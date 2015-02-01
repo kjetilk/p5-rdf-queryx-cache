@@ -29,7 +29,7 @@ has remoteendpoint => (is => 'ro', isa => Str, required => 1);
 
 
 has store => (is => 'ro',
-				  isa => InstanceOf['CHI::Driver'],
+				  isa => InstanceOf['Redis::Fast'],
 				  required => 1
 				 );
 
@@ -44,6 +44,6 @@ has remotetriples => (is => 'rw', isa => ArrayRef['RDF::Query::Algebra::Quad'], 
 
 requires 'digest';
 requires 'threshold';
-#requires '';
+requires 'analyze';
 
 1;
