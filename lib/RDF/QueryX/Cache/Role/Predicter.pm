@@ -33,8 +33,21 @@ has cache => (is => 'ro',
 				  required => 1
 				 );
 
-has localtriples  => (is => 'rw', isa => ArrayRef, handles_via => 'Array');
-has remotetriples => (is => 'rw', isa => ArrayRef, handles_via => 'Array');
+has localtriples => (is => 'rw',
+							isa => ArrayRef,
+							handles_via => 'Array',
+							handles => {
+											add_localtriples => 'push' 
+										  },
+							default => sub {[]});
+
+has remotetriples => (is => 'rw',
+							 isa => ArrayRef,
+							 handles_via => 'Array',
+							 handles => {
+											 add_remotetriples => 'push' 
+											},
+							 default => sub {[]});
 
 
 requires 'digest';

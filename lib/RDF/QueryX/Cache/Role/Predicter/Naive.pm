@@ -16,17 +16,15 @@ sub analyze {
 	my $qo = $self->query;
 	my $count = 0;
 	# TODO: Return undef if we can't process the query
-#	die Data::Dumper::Dumper($qo->pattern->triples);
 	foreach my $triple (@{$qo->pattern->triples}) {
-		warn Data::Dumper::Dumper($triple);
 		my $key = $self->digest($triple);
 
 		# First, create the patterns used to evaluate the query
 		if ($key && ($self->cache->is_valid($key))) {
-			$self->localtriples->push($triple);
+			$self->add_localtriples($triple);
 			$count++;
 		} else {
-			$self->remotetriples->push($triple);
+			$self->add_remotetriples($triple);
 		}
 
 		next unless ($key);
