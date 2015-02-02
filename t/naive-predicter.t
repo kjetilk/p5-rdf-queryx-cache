@@ -37,7 +37,7 @@ eval {
 
 my $redis1 = Redis::Fast->new( $redis_server->connect_info );
 my $redis2 = Redis::Fast->new( $redis_server->connect_info );
- 
+
 is $redis1->ping, 'PONG', 'Redis Pubsub ping pong ok';
 is $redis2->ping, 'PONG', 'Redis store ping pong ok';
 
@@ -47,19 +47,20 @@ is $redis2->ping, 'PONG', 'Redis store ping pong ok';
 	with 'RDF::QueryX::Cache::Role::Predicter::Naive';
 }
 
-my $naive = Tmp::Test->new(query => 'FOO',
-									cache => CHI->new( driver => 'Memory', global => 1 ),
-									pubsub => $redis1, store => $redis2,
-									remoteendpoint => 'http://localhost/');
+{
+	note "Setting up and basic tests";
+	my $naive = Tmp::Test->new(query => 'CONSTRUCT ',
+										cache => CHI->new( driver => 'Memory', global => 1 ),
+										pubsub => $redis1, store => $redis2,
+										remoteendpoint => 'http://localhost/');
 
-
-does_ok($naive, 'RDF::QueryX::Cache::Role::Predicter');
-does_ok($naive, 'RDF::QueryX::Cache::Role::Predicter::Naive');
-has_attribute_ok($naive, 'query');
-has_attribute_ok($naive, 'threshold');
-can_ok('RDF::QueryX::Cache::Role::Predicter::Naive', 'digest');
-can_ok('RDF::QueryX::Cache::Role::Predicter::Naive', 'analyze');
-
+	does_ok($naive, 'RDF::QueryX::Cache::Role::Predicter');
+	does_ok($naive, 'RDF::QueryX::Cache::Role::Predicter::Naive');
+	has_attribute_ok($naive, 'query');
+	has_attribute_ok($naive, 'threshold');
+	can_ok('RDF::QueryX::Cache::Role::Predicter::Naive', 'digest');
+	can_ok('RDF::QueryX::Cache::Role::Predicter::Naive', 'analyze');
+}
 
 
 
