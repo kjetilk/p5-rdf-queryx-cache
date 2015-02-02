@@ -84,6 +84,7 @@ print $@;
 	note "Testing analyzer";
 	is($naive->analyze, 0, 'No triples in the cache yet');
 	is($redis2->get('http://dbpedia.org/ontology/populationTotal'), 1, "We counted one pop");
+	is($redis2->get('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 1, "We counted one rdf:type");
 }
 
 
