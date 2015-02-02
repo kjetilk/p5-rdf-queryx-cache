@@ -28,7 +28,7 @@ use Moo::Role;
 use Redis::Fast;
 use CHI;
 use Test::RedisServer;
-
+use RDF::Query;
 
 my $redis_server;
 eval {
@@ -47,9 +47,29 @@ is $redis2->ping, 'PONG', 'Redis store ping pong ok';
 	with 'RDF::QueryX::Cache::Role::Predicter::Naive';
 }
 
+my $basequery =<<'EOQ';
+PREFIX dbo: <http://dbpedia.org/ontology/> 
+
+CONSTRUCT {
+  ?place a dbo:PopulatedPlace .
+  ?place dbo:populationTotal ?pop .
+} WHERE {
+  ?place a dbo:PopulatedPlace .
+  ?place dbo:populationTotal ?pop .
+  FILTER (?place < 50)
+}
+EOQ
+my $tmp;
+
+eval {
+$tmp = RDF::Query->new($basequery);
+};
+print $@;
+#my $tmp = RDF::Query->new("CONSTRUCT WHERE { ?s ?p ?o }");
+
 {
 	note "Setting up and basic tests";
-	my $naive = Tmp::Test->new(query => 'CONSTRUCT ',
+	my $naive = Tmp::Test->new(query => $tmp,
 										cache => CHI->new( driver => 'Memory', global => 1 ),
 										pubsub => $redis1, store => $redis2,
 										remoteendpoint => 'http://localhost/');
@@ -60,6 +80,10 @@ is $redis2->ping, 'PONG', 'Redis store ping pong ok';
 	has_attribute_ok($naive, 'threshold');
 	can_ok('RDF::QueryX::Cache::Role::Predicter::Naive', 'digest');
 	can_ok('RDF::QueryX::Cache::Role::Predicter::Naive', 'analyze');
+
+	note "Testing analyzer";
+	is($naive->analyze, 0, 'No triples in the cache yet');
+	is($redis2->get('http://dbpedia.org/ontology/populationTotal'), 1, "We counted one pop");
 }
 
 
