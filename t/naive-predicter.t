@@ -29,6 +29,8 @@ use Redis::Fast;
 use CHI;
 use Test::RedisServer;
 use RDF::Query;
+use URI;
+use URI::Escape::XS qw/uri_unescape/;
 
 my $redis_server;
 eval {
@@ -66,7 +68,23 @@ my %baseconfig = (
 						remoteendpoint => 'http://localhost/'
 					  );
 
-$redis1->subscribe('prefetch.queries', sub { note join ("\t", @_); });
+my $checkquery = sub { 
+	my $url = URI->new(shift);
+	my $tmp = $url->query;
+	$tmp =~ s/^?query=(.+)$/$1/;
+	my $query = uri_unescape($tmp);
+	my $qo = RDF::Query->new($query);
+	my @patterns = $qo->pattern->subpatterns_of_type('RDF::Trine::Statement');
+	subtest "Tests on the query" => sub
+	  {
+		  is(scalar @patterns, 1, 'Just one triple pattern');
+		  my $pattern = shift @patterns;
+		  ok($pattern->subject->is_variable, 'Subject is variable');
+		  ok($pattern->predicate->is_resource, 'Predicate is bound');
+		  ok($pattern->object->is_variable, 'Object is variable');
+	  };
+};
+$redis1->subscribe('prefetch.queries', $checkquery);
 
 {
 	note "Setting up and basic tests";
@@ -103,7 +121,7 @@ $basequery =~ s/< 50/> 5000000/;
 $basequery =~ s/a dbo:PopulatedPlace/dbo:abstract ?abs/g;
 
 {
-	note "Testing analyzer with query 2";
+	note "Testing analyzer with query 3";
 	my $naive = Tmp::Test->new(query => RDF::Query->new($basequery), %baseconfig);
 
 	does_ok($naive, 'RDF::QueryX::Cache::Role::Predicter::Naive');
@@ -113,6 +131,21 @@ $basequery =~ s/a dbo:PopulatedPlace/dbo:abstract ?abs/g;
 	is($redis2->get('http://dbpedia.org/ontology/abstract'), 1, "We counted one abstract");
 	is($redis2->get('http://dbpedia.org/ontology/populationTotal'), 3, "We counted three pops");
 	is($redis2->get('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 2, "We counted two rdf:types");
+}
+
+$basequery =~ s/FILTER \(\?place > 5000000\)/?place a dbo:Region ./;
+
+{
+	note "Testing analyzer with query 4";
+	my $naive = Tmp::Test->new(query => RDF::Query->new($basequery), %baseconfig);
+
+	does_ok($naive, 'RDF::QueryX::Cache::Role::Predicter::Naive');
+
+	is($naive->analyze, 0, 'No triples in the cache yet');
+	is($redis1->wait_for_messages(1), 1, 'Reached threshold for pops and rdf:type');
+	is($redis2->get('http://dbpedia.org/ontology/abstract'), 2, "We counted two abstracts");
+	is($redis2->get('http://dbpedia.org/ontology/populationTotal'), 4, "We counted four pops");
+	is($redis2->get('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 3, "We counted three rdf:types");
 }
 
 done_testing;
