@@ -60,12 +60,16 @@ CONSTRUCT {
 }
 EOQ
 
+my %baseconfig = (
+						cache => CHI->new( driver => 'Memory', global => 1 ),
+						pubsub => $redis1, store => $redis2,
+						remoteendpoint => 'http://localhost/'
+					  );
+
+
 {
 	note "Setting up and basic tests";
-	my $naive = Tmp::Test->new(query => RDF::Query->new($basequery),
-										cache => CHI->new( driver => 'Memory', global => 1 ),
-										pubsub => $redis1, store => $redis2,
-										remoteendpoint => 'http://localhost/');
+	my $naive = Tmp::Test->new(query => RDF::Query->new($basequery), %baseconfig);
 
 	does_ok($naive, 'RDF::QueryX::Cache::Role::Predicter');
 	does_ok($naive, 'RDF::QueryX::Cache::Role::Predicter::Naive');
@@ -81,6 +85,7 @@ EOQ
 	is($redis2->get('http://dbpedia.org/ontology/populationTotal'), 1, "We counted one pop");
 	is($redis2->get('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 1, "We counted one rdf:type");
 }
+
 
 
 
