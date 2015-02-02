@@ -59,17 +59,10 @@ CONSTRUCT {
   FILTER (?place < 50)
 }
 EOQ
-my $tmp;
-
-eval {
-$tmp = RDF::Query->new($basequery);
-};
-print $@;
-#my $tmp = RDF::Query->new("CONSTRUCT WHERE { ?s ?p ?o }");
 
 {
 	note "Setting up and basic tests";
-	my $naive = Tmp::Test->new(query => $tmp,
+	my $naive = Tmp::Test->new(query => RDF::Query->new($basequery),
 										cache => CHI->new( driver => 'Memory', global => 1 ),
 										pubsub => $redis1, store => $redis2,
 										remoteendpoint => 'http://localhost/');
@@ -87,9 +80,7 @@ print $@;
 	is($redis1->wait_for_messages(1), 0, 'Not reached threshold yet');
 	is($redis2->get('http://dbpedia.org/ontology/populationTotal'), 1, "We counted one pop");
 	is($redis2->get('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 1, "We counted one rdf:type");
-
 }
-
 
 
 
