@@ -7,7 +7,7 @@ use Moo::Role;
 use Types::Standard qw(Int);
 
 use RDF::Query;
-use JSON::XS;
+use URI::Escape::XS qw/uri_escape/;
 
 with 'RDF::QueryX::Cache::Role::Predicter';
 
@@ -30,9 +30,7 @@ sub analyze {
 		$self->store->incr($key);
 		my $count = $self->store->get($key);
 		if ($count == $self->threshold) { # Fails if two clients are updating at the same time
-			my $push = { 'myquery' => 'CONSTRUCT WHERE { ' . $quad->as_sparql . ' }',
-							 'endpoint' => $self->remoteendpoint };
-			$self->pubsub->publish('prefetch.queries', encode_json($push));
+			$self->pubsub->publish('prefetch.queries', $self->remoteendpoint . '?query=' . uri_escape('CONSTRUCT WHERE { ' . $quad->as_sparql . ' }'));
 		}
 
 	}
