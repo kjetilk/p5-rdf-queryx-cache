@@ -82,9 +82,12 @@ print $@;
 	can_ok('RDF::QueryX::Cache::Role::Predicter::Naive', 'analyze');
 
 	note "Testing analyzer";
+	$redis1->subscribe('prefetch.queries', sub { note join ("\t", @_); });
 	is($naive->analyze, 0, 'No triples in the cache yet');
+	is($redis1->wait_for_messages(1), 0, 'Not reached threshold yet');
 	is($redis2->get('http://dbpedia.org/ontology/populationTotal'), 1, "We counted one pop");
 	is($redis2->get('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 1, "We counted one rdf:type");
+
 }
 
 

@@ -33,7 +33,7 @@ sub analyze {
 		$self->store->incr($key);
 		my $count = $self->store->get($key);
 		if ($count == $self->threshold) { # Fails if two clients are updating at the same time
-			$self->pubsub->publish('prefetch.queries', $self->remoteendpoint . '?query=' . uri_escape('CONSTRUCT WHERE { ' . $triple->as_sparql . ' }'));
+			$self->store->publish('prefetch.queries', $self->remoteendpoint . '?query=' . uri_escape('CONSTRUCT WHERE { ' . $triple->as_sparql . ' }'));
 		}
 
 	}
