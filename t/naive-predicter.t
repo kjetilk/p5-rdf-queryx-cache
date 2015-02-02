@@ -66,6 +66,7 @@ my %baseconfig = (
 						remoteendpoint => 'http://localhost/'
 					  );
 
+$redis1->subscribe('prefetch.queries', sub { note join ("\t", @_); });
 
 {
 	note "Setting up and basic tests";
@@ -79,15 +80,40 @@ my %baseconfig = (
 	can_ok('RDF::QueryX::Cache::Role::Predicter::Naive', 'analyze');
 
 	note "Testing analyzer";
-	$redis1->subscribe('prefetch.queries', sub { note join ("\t", @_); });
 	is($naive->analyze, 0, 'No triples in the cache yet');
 	is($redis1->wait_for_messages(1), 0, 'Not reached threshold yet');
 	is($redis2->get('http://dbpedia.org/ontology/populationTotal'), 1, "We counted one pop");
 	is($redis2->get('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 1, "We counted one rdf:type");
 }
 
+$basequery =~ s/< 50/> 5000000/;
 
+{
+	note "Testing analyzer with query 2";
+	my $naive = Tmp::Test->new(query => RDF::Query->new($basequery), %baseconfig);
 
+	does_ok($naive, 'RDF::QueryX::Cache::Role::Predicter::Naive');
+
+	is($naive->analyze, 0, 'No triples in the cache yet');
+	is($redis1->wait_for_messages(1), 0, 'Not reached threshold yet');
+	is($redis2->get('http://dbpedia.org/ontology/populationTotal'), 2, "We counted two pops");
+	is($redis2->get('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 2, "We counted two rdf:types");
+}
+
+$basequery =~ s/a dbo:PopulatedPlace/dbo:abstract ?abs/g;
+
+{
+	note "Testing analyzer with query 2";
+	my $naive = Tmp::Test->new(query => RDF::Query->new($basequery), %baseconfig);
+
+	does_ok($naive, 'RDF::QueryX::Cache::Role::Predicter::Naive');
+
+	is($naive->analyze, 0, 'No triples in the cache yet');
+	is($redis1->wait_for_messages(1), 1, 'Reached threshold for pops');
+	is($redis2->get('http://dbpedia.org/ontology/abstract'), 1, "We counted one abstract");
+	is($redis2->get('http://dbpedia.org/ontology/populationTotal'), 3, "We counted three pops");
+	is($redis2->get('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 2, "We counted two rdf:types");
+}
 
 done_testing;
 
