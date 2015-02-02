@@ -14,12 +14,15 @@ with 'RDF::QueryX::Cache::Role::Predicter';
 sub analyze {
 	my $self = shift;
 	my $qo = $self->query;
+	my $count = 0;
+	# TODO: Return undef if we can't process the query
 	foreach my $quad ($qo->pattern->quads) {
 		my $key = $self->digest($quad);
 
 		# First, create the patterns used to evaluate the query
 		if ($key && ($self->cache->is_valid($key))) {
 			$self->localtriples->push($quad);
+			$count++;
 		} else {
 			$self->remotetriples->push($quad);
 		}
@@ -34,6 +37,7 @@ sub analyze {
 		}
 
 	}
+	return $count;
 }
 
 has threshold => ( is => 'rw', isa => Int, default => sub { 3 });
