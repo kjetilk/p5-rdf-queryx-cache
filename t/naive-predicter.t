@@ -38,7 +38,8 @@ eval {
 my $redis1 = Redis::Fast->new( $redis_server->connect_info );
 my $redis2 = Redis::Fast->new( $redis_server->connect_info );
  
-is $redis1->ping, 'PONG', 'Redis ping pong ok';
+is $redis1->ping, 'PONG', 'Redis Pubsub ping pong ok';
+is $redis2->ping, 'PONG', 'Redis store ping pong ok';
 
 {
 	package Tmp::Test;
