@@ -6,24 +6,14 @@ use warnings;
 use Moo::Role;
 use Types::Standard qw(InstanceOf Str Int ArrayRef);
 use MooX::HandlesVia;
+use Scalar::Util qw(blessed);
 
 use RDF::Query;
 
 has query => (is => 'ro', 
-				  isa => Str | InstanceOf['RDF::Query'],
-				  builder => '_build_query',
+				  isa => InstanceOf['RDF::Query'],
 				  required => 1
 				 );
-
-
-sub _build_query {
-	my ($self, $query) = @_;
-	if ($query->isa('RDF::Query')) {
-		return $query;
-	} else {
-		return RDF::Query->new($query);
-	}
-}
 
 has remoteendpoint => (is => 'ro', isa => Str, required => 1);
 
