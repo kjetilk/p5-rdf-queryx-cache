@@ -1,14 +1,24 @@
 # This file contains general metadata about the project.
 
 @prefix : <http://usefulinc.com/ns/doap#>.
+@prefix prov: <http://www.w3.org/ns/prov#>.
+@prefix cpan-uri: <http://purl.org/NET/cpan-uri/terms#> .
+
 
 `RDF-QueryX-Cache`
 	:programming-language "Perl" ;
 	:shortdesc            "A research module to manage SPARQL query caching on a proxy";
+        :description          "This distribution is part of Kjetil Kjernsmo's ongoing Ph.D. project to implement a prefetching query cache for SPARQL queries utilizing existing Internet infrastructure";
+    
 	:homepage             <https://metacpan.org/release/RDF-QueryX-Cache>;
 	:download-page        <https://metacpan.org/release/RDF-QueryX-Cache>;
 	:bug-database         <http://rt.cpan.org/Dist/Display.html?Queue=RDF-QueryX-Cache>;
-#	:repository           [ a :GitRepository; :browse <https://github.com/kjetilk/p5-rdf-queryx-cache> ];
+        :mailing-list         <http://lists.perlrdf.org/listinfo/dev> ;
+        :wiki                 <http://wiki.perlrdf.org/> ;
+        cpan-uri:x_IRC        <irc://irc.perl.org/#perlrdf> ;
+	:repository           [ a :GitRepository; 
+                                :browse <https://github.com/kjetilk/p5-rdf-queryx-cache>                                                       prov:has_provenance <http://git2prov.org/git2prov?giturl=https%3A%2F%2Fgithub.com%2Fkjetilk%2Fp5-rdf-queryx-cache&serialization=PROV-O#> 
+];
 	:created              2015-01-29;
 	:license              <http://dev.perl.org/licenses/>;
 	:maintainer           cpan:KJETILK;
