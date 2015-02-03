@@ -4,10 +4,6 @@ perl:
   - "5.16"
   - "5.18"
   - "5.20"
-matrix:
-  include:
-    - perl: 5.18.2
-      env: COVERAGE=1
 services:
   - redis-server
 before_install:
