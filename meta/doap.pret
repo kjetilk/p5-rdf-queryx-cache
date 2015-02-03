@@ -17,8 +17,9 @@
         :wiki                 <http://wiki.perlrdf.org/> ;
         cpan-uri:x_IRC        <irc://irc.perl.org/#perlrdf> ;
 	:repository           [ a :GitRepository; 
-                                :browse <https://github.com/kjetilk/p5-rdf-queryx-cache>                                                       prov:has_provenance <http://git2prov.org/git2prov?giturl=https%3A%2F%2Fgithub.com%2Fkjetilk%2Fp5-rdf-queryx-cache&serialization=PROV-O#> 
-];
+                                :browse <https://github.com/kjetilk/p5-rdf-queryx-cache>;
+                                prov:has_provenance <http://git2prov.org/git2prov?giturl=https%3A%2F%2Fgithub.com%2Fkjetilk%2Fp5-rdf-queryx-cache&serialization=PROV-O#> 
+                              ];
 	:created              2015-01-29;
 	:license              <http://dev.perl.org/licenses/>;
 	:maintainer           cpan:KJETILK;
