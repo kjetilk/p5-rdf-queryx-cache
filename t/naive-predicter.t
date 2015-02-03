@@ -64,7 +64,7 @@ EOQ
 
 my %baseconfig = (
 						cache => CHI->new( driver => 'Memory', global => 1 ),
-						pubsub => $redis1, store => $redis2,
+					   store => $redis2,
 						remoteendpoint => 'http://localhost/'
 					  );
 
