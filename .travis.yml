@@ -8,6 +8,8 @@ matrix:
   include:
     - perl: 5.18.2
       env: COVERAGE=1
+services:
+  - redis-server
 before_install:
   - export DIST_INKT_PROFILE="Dist::Inkt::Profile::TOBYINK"
   - git clone git://github.com/tobyink/perl-travis-helper
