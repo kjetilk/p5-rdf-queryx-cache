@@ -7,6 +7,7 @@ use Moo::Role;
 use Types::Standard qw(Int);
 
 use RDF::Query;
+use RDF::Trine qw(variable);
 use URI::Escape::XS qw/uri_escape/;
 
 with 'RDF::QueryX::Cache::Role::Predicter';
@@ -33,7 +34,8 @@ sub analyze {
 		$self->store->incr($key);
 		my $count = $self->store->get($key);
 		if ($count == $self->threshold) { # Fails if two clients are updating at the same time
-			$self->store->publish('prefetch.queries', $self->remoteendpoint . '?query=' . uri_escape('CONSTRUCT WHERE { ' . $quad->as_sparql . ' }'));
+			my $triple = RDF::Query::Algebra::Triple->new(variable('s'), $quad->predicate, variable('o'));
+			$self->store->publish('prefetch.queries', $self->remoteendpoint . '?query=' . uri_escape('CONSTRUCT WHERE { ' . $triple->as_sparql . ' }'));
 		}
 
 	}
