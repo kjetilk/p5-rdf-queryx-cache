@@ -16,15 +16,15 @@ sub analyze {
 	my $qo = $self->query;
 	my $count = 0;
 	# TODO: Return undef if we can't process the query
-	foreach my $triple (@{$qo->pattern->triples}) {
-		my $key = $self->digest($triple);
+	foreach my $quad ($qo->pattern->subpatterns_of_type('RDF::Trine::Statement')) {
+		my $key = $self->digest($quad);
 
 		# First, create the patterns used to evaluate the query
 		if ($key && ($self->cache->is_valid($key))) {
-			$self->add_localtriples($triple);
+			$self->add_localtriples($quad);
 			$count++;
 		} else {
-			$self->add_remotetriples($triple);
+			$self->add_remotetriples($quad);
 		}
 
 		next unless ($key);
@@ -33,7 +33,7 @@ sub analyze {
 		$self->store->incr($key);
 		my $count = $self->store->get($key);
 		if ($count == $self->threshold) { # Fails if two clients are updating at the same time
-			$self->store->publish('prefetch.queries', $self->remoteendpoint . '?query=' . uri_escape('CONSTRUCT WHERE { ' . $triple->as_sparql . ' }'));
+			$self->store->publish('prefetch.queries', $self->remoteendpoint . '?query=' . uri_escape('CONSTRUCT WHERE { ' . $quad->as_sparql . ' }'));
 		}
 
 	}
@@ -44,9 +44,9 @@ has threshold => ( is => 'rw', isa => Int, default => sub { 3 });
 
 
 sub digest {
-	my ($self, $triple) = @_;
-	if ($triple->predicate->is_resource) {
-		return $triple->predicate->uri_value;
+	my ($self, $quad) = @_;
+	if ($quad->predicate->is_resource) {
+		return $quad->predicate->uri_value;
 	} else {
 		return undef;
 	}

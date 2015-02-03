@@ -74,7 +74,7 @@ my $checkquery = sub {
 	$tmp =~ s/^?query=(.+)$/$1/;
 	my $query = uri_unescape($tmp);
 	my $qo = RDF::Query->new($query);
-	my @patterns = @{$qo->pattern->triples};
+	my @patterns = $qo->pattern->pattern->subpatterns_of_type('RDF::Trine::Statement');
 	subtest "Tests on the query" => sub
 	  {
 		  is(scalar @patterns, 1, 'Just one triple pattern');
