@@ -94,7 +94,7 @@ has cache => (is => 'ro',
 				 );
 
 
-=item C<< localtriples >>, C<< add_localtriples>>
+=item C<< localtriples >>, C<< add_localtriples >>
 
 An arrayref of triple patterns that have fresh results the local
 cache.
@@ -111,7 +111,7 @@ has localtriples => (is => 'rw',
 
 
 
-=item C<< remotetriples >>, C<< add_remotetriples>>
+=item C<< remotetriples >>, C<< add_remotetriples >>
 
 An arrayref of triple patterns that doesn't have fresh results the
 local cache.
@@ -161,6 +161,8 @@ topic named C<prefetch.queries>.
 If it found any query parts that are cached locally, it must return a
 true value. To actively decline to process a certain query, return
 C<undef>.
+
+=back
 
 =cut
 
