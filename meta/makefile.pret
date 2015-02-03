@@ -5,7 +5,7 @@
 `RDF-QueryX-Cache`
     :test-requirement       [ :on "Test::More 0.96"^^:CpanId ];
     :test-requirement       [ :on "Test::Moose"^^:CpanId ];
-    :test-requirement       [ :on "Test::RedisServer 0.96"^^:CpanId ];
+    :test-requirement       [ :on "Test::RedisServer"^^:CpanId ];
     :runtime-requirement    [ :on "Moo"^^:CpanId ];
     :runtime-requirement    [ :on "MooX::HandlesVia"^^:CpanId ];
     :runtime-requirement    [ :on "CHI"^^:CpanId ];
