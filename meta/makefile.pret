@@ -3,7 +3,19 @@
 @prefix : <http://ontologi.es/doap-deps#>.
 
 `RDF-QueryX-Cache`
-	:test-requirement       [ :on "Test::More 0.96"^^:CpanId ];
-	:develop-recommendation [ :on "Dist::Inkt 0.001"^^:CpanId ];
-	.
+    :test-requirement       [ :on "Test::More 0.96"^^:CpanId ];
+    :test-requirement       [ :on "Test::Moose"^^:CpanId ];
+    :test-requirement       [ :on "Test::RedisServer 0.96"^^:CpanId ];
+    :runtime-requirement    [ :on "Moo"^^:CpanId ];
+    :runtime-requirement    [ :on "MooX::HandlesVia"^^:CpanId ];
+    :runtime-requirement    [ :on "CHI"^^:CpanId ];
+    :runtime-requirement    [ :on "Redis::Fast"^^:CpanId ];
+    :runtime-requirement    [ :on "RDF::Trine"^^:CpanId ];
+    :runtime-requirement    [ :on "RDF::Query"^^:CpanId ];
+    :runtime-requirement    [ :on "Types::Standard"^^:CpanId ];     
+    :runtime-requirement    [ :on "Scalar::Util"^^:CpanId ]; 
+    :runtime-requirement    [ :on "URI"^^:CpanId ]; 
+    :runtime-requirement    [ :on "URI::Escape::XS"^^:CpanId ]; 
+    :develop-recommendation [ :on "Dist::Inkt 0.001"^^:CpanId ];
+    .
 
