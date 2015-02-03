@@ -28,7 +28,11 @@ documentation on how to compose a class in practice.
 This is a L<Moo::Role> that needs to be composed into a class to do
 any real work. It contains implementations of core functionality as
 well as requirements for the composed class. As such, it is both an
-implementation and API documentation.
+implementation and API documentation. In the future, the present
+architecture should be trivially extensible to a plugin architecture
+where the predicters are plugins, so that there are many different
+ways to implement them. Obviously, using existing techniques to query
+similarity is a prime example of such plugins.
 
 =head2 Constructor
 
