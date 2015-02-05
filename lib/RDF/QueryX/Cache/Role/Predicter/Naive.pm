@@ -147,7 +147,7 @@ sub digest {
 sub rewrite {
 	my $self = shift;
 	my $newquery = $self->query;
-	warn "FOOOO: " . Dumper($self->translate($newquery->pattern));
+	warn($self->translate($newquery->pattern)->as_sparql);
 }
 
 sub translate {
@@ -158,16 +158,32 @@ sub translate {
 	} elsif ($a->isa('RDF::Query::Algebra::Project')) {
 		return $a;
 	} elsif ($a->isa('RDF::Query::Algebra::GroupGraphPattern')) {
-		return RDF::Query::Algebra::GroupGraphPattern->new(map { $self->translate($_) } $a->patterns);
-	} elsif ($a->isa('RDF::Query::Algebra::BasicGraphPattern')) {
-		my @p;
-		foreach my $t ($a->triples) {
-			if ($t->subject->is_variable) {
-				$t = triple(variable('s'), $t->predicate, $t->object);
-			}
-			push(@p, $t);
+		my $ggp = RDF::Query::Algebra::GroupGraphPattern->new;
+		foreach my $p ($a->patterns) {
+			my @tps = $self->translate($p);
+			map { $ggp->add_pattern($_) } @tps;
 		}
-		return RDF::Query::Algebra::BasicGraphPattern->new(@p);
+		return $ggp;
+	} elsif ($a->isa('RDF::Query::Algebra::BasicGraphPattern')) {
+		my @local;
+		my @remote;
+		foreach my $t ($a->triples) {
+			my $key = $self->digest($t);
+			if ($key && ($self->cache->is_valid($key))) {
+				push (@local, $t);
+			} else {
+				push(@remote, $t);
+			}
+		}
+		my @all;
+		if (scalar @local > 0) {
+			push(@all, RDF::Query::Algebra::BasicGraphPattern->new(@local));
+		}
+		if (scalar @remote > 0) {
+			push(@all, RDF::Query::Algebra::Service->new(RDF::Query::Node::Resource->new($self->remoteendpoint),
+																		RDF::Query::Algebra::BasicGraphPattern->new(@remote)));
+		}
+		return @all;
 	}  elsif ($a->isa('RDF::Query::Algebra::Triple')) {
 		return $a;
 	} elsif ($a->isa('RDF::Query::Node::Variable')) {
