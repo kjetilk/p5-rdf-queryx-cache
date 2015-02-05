@@ -154,15 +154,12 @@ sub translate {
 	my ($self, $a) = @_;
 	Carp::confess "Not a reference? " . Dumper($a) unless blessed($a);
 	if ($a->isa('RDF::Query::Algebra::Construct')) {
-		warn "Pattern " . Dumper($a->pattern);
-		warn "Triples " . Dumper($a->triples);
 		return RDF::Query::Algebra::Construct->new($self->translate($a->pattern), $a->triples);
 	} elsif ($a->isa('RDF::Query::Algebra::Project')) {
 		return $a;
 	} elsif ($a->isa('RDF::Query::Algebra::GroupGraphPattern')) {
 		return RDF::Query::Algebra::GroupGraphPattern->new(map { $self->translate($_) } $a->patterns);
 	} elsif ($a->isa('RDF::Query::Algebra::BasicGraphPattern')) {
-		warn "DAAAAAAAAAAHut";
 		my @p;
 		foreach my $t ($a->triples) {
 			if ($t->subject->is_variable) {
@@ -194,7 +191,6 @@ sub translate {
 		return $a;
 	} elsif ($a->isa('RDF::Query::Algebra::Filter')) {
 		my $p           = $self->translate($a->pattern);
-		warn "KAPNG". Dumper($p);
 		return RDF::Query::Algebra::Filter->new($a->expr, $p);
 	} elsif ($a->isa('RDF::Query::Expression::Binary')) {
 		return $a;
