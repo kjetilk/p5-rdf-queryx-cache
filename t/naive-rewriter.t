@@ -29,6 +29,7 @@ use Redis::Fast;
 use CHI;
 use Test::RedisServer;
 use RDF::Query;
+use RDF::Trine qw(statement iri variable);
 use URI;
 use URI::Escape::XS qw/uri_unescape/;
 
@@ -90,11 +91,21 @@ SERVICE <http://remote.example.org/sparql> {
 EOQ
 
 $nolocal = RDF::Query->new($nolocal)->pattern->as_sparql;
-warn "Have\n" . $nolocal;
-warn "Got\n" . $nolocalrw->as_sparql;
-#$nolocalq =~ s/\s+/\\s+/g;
-like($nolocalrw->as_sparql, qr/$nolocal/, "Query with no locals ok");
+warn "No local Have\n" . $nolocal;
+warn "No local Got\n" . $nolocalrw->as_sparql;
 
+is($nolocalrw->as_sparql, $nolocal, "Query with no locals ok");
+
+my $aremotekey = $naive->digest(statement(variable('place'), 
+														iri('http://dbpedia.org/ontology/populationTotal'),
+														variable('pop')));
+
+
+$naive->cache->set($aremotekey, '1');
+
+
+my $aremoterw = $naive->rewrite;
+isa_ok($aremoterw, 'RDF::Query::Algebra');
 
 
 my $aremote =<<'EOQ';
@@ -104,14 +115,31 @@ PREFIX dbo: <http://dbpedia.org/ontology/>
         ?place dbo:populationTotal ?pop .
 }
 WHERE {
+        ?place dbo:populationTotal ?pop .
  SERVICE <http://remote.example.org/sparql> {
         ?place a dbo:PopulatedPlace .
  }
-        ?place dbo:populationTotal ?pop .
         FILTER( (?pop < 50) ) .
 
 }
 EOQ
+
+$aremote = RDF::Query->new($aremote)->pattern->as_sparql;
+warn "One remote Have\n" . $aremote;
+warn "One remote Got\n" . $aremoterw->as_sparql;
+
+is($aremoterw->as_sparql, $aremote, "Query with one remote ok");
+
+
+my $popremotekey = $naive->digest(statement(variable('place'), 
+													  iri('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 
+													  iri('http://dbpedia.org/ontology/PopulatedPlace')));
+
+$naive->cache->remove($aremotekey);
+$naive->cache->set($popremotekey, '1');
+
+my $popremoterw = $naive->rewrite;
+isa_ok($popremoterw, 'RDF::Query::Algebra');
 
 my $popremote =<<'EOQ';
 PREFIX dbo: <http://dbpedia.org/ontology/>
@@ -127,5 +155,12 @@ WHERE {
  }
 }
 EOQ
+
+$popremote = RDF::Query->new($popremote)->pattern->as_sparql;
+warn "One remote Have\n" . $popremote;
+warn "One remote Got\n" . $popremoterw->as_sparql;
+
+is($popremoterw->as_sparql, $popremote, "Query with population as remote ok");
+
 
 done_testing;
