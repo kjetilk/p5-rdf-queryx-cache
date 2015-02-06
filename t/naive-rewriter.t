@@ -75,25 +75,20 @@ my $nolocalrw = $naive->rewrite;
 isa_ok($nolocalrw, 'RDF::Query::Algebra');
 
 my $nolocal =<<'EOQ';
-PREFIX dbo: <http://dbpedia.org/ontology/>
 CONSTRUCT {
-        ?place a dbo:PopulatedPlace .
-        ?place dbo:populationTotal ?pop .
+        \?place a dbo:PopulatedPlace .
+        \?place dbo:populationTotal \?pop .
 }
 WHERE {
-SERVICE <http://remote.example.org/sparql> {
-        ?place a dbo:PopulatedPlace .
-        ?place dbo:populationTotal ?pop .
-        FILTER( (?pop < 50) ) .
-}
+SERVICE <http://remote.example.org/sparql> \?place a dbo:PopulatedPlace .
+        \?place dbo:populationTotal \?pop .
+        FILTER( (\?pop < 50) ) .
 }
 EOQ
 
-
-my $nolocalq = RDF::Query->new($nolocal);
-warn Data::Dumper::Dumper($nolocalrw);
-warn Data::Dumper::Dumper($nolocalq->pattern);
-is_deeply($nolocalrw, $nolocalq->pattern, "Query with no locals ok");
+warn $nolocal;
+$nolocal =~ s/\s+/\\s+/gs;
+like($nolocalrw->as_sparql, qr/$nolocal/, "Query with no locals ok");
 
 
 
@@ -128,4 +123,3 @@ WHERE {
 }
 EOQ
 
-done_testing;
