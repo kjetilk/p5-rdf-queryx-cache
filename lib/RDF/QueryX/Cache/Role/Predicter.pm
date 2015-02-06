@@ -7,6 +7,7 @@ use Moo::Role;
 use Types::Standard qw(InstanceOf Str Int ArrayRef);
 use MooX::HandlesVia;
 use Scalar::Util qw(blessed);
+use Data::Dumper;
 
 use RDF::Query;
 
