@@ -147,7 +147,7 @@ sub digest {
 sub rewrite {
 	my $self = shift;
 	my $newquery = $self->query;
-	warn($self->translate($newquery->pattern)->as_sparql);
+	return $self->translate($newquery->pattern);
 }
 
 sub translate {
@@ -266,8 +266,6 @@ sub translate {
 				|| $a->isa('RDF::Query::Algebra::Optional')
 				|| $a->isa('RDF::Query::Algebra::NamedGraph')
 				|| $a->isa('RDF::Query::Algebra::Extend')) {
-	#	$self->translate($a->pattern
-	#	return map { $self->translate($_) } $a->construct_args;
 		return ref($a)->new(map { $self->translate($_) } $a->construct_args);
 	} #elsif ($a->isa('RDF::Query::Algebra::SubSelect')) {
 		# TODO: Support rewrite; hard right now for the lack of feeding algebra back to query constructor

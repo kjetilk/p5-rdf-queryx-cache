@@ -64,31 +64,38 @@ my %baseconfig = (
 						remoteendpoint => 'http://remote.example.org/sparql'
 					  );
 
-{
-	note "Setting up and basic tests";
-	my $naive = Tmp::Test->new(query => RDF::Query->new($basequery), %baseconfig);
+note "Setting up and basic tests";
+my $naive = Tmp::Test->new(query => RDF::Query->new($basequery), %baseconfig);
 
-	can_ok('RDF::QueryX::Cache::Role::Predicter::Naive', 'analyze');
+can_ok('RDF::QueryX::Cache::Role::Predicter::Naive', 'analyze');
 
-	note "Testing query 1";
-	$naive->rewrite;
-	warn $naive->query->as_sparql;
-}
+note "Testing query 1";
+
+my $nolocalrw = $naive->rewrite;
+isa_ok($nolocalrw, 'RDF::Query::Algebra');
 
 my $nolocal =<<'EOQ';
 PREFIX dbo: <http://dbpedia.org/ontology/>
- CONSTRUCT {
+CONSTRUCT {
         ?place a dbo:PopulatedPlace .
         ?place dbo:populationTotal ?pop .
 }
 WHERE {
- SERVICE <http://remote.example.org/sparql> {
+SERVICE <http://remote.example.org/sparql> {
         ?place a dbo:PopulatedPlace .
         ?place dbo:populationTotal ?pop .
         FILTER( (?pop < 50) ) .
- }
+}
 }
 EOQ
+
+
+my $nolocalq = RDF::Query->new($nolocal);
+warn Data::Dumper::Dumper($nolocalrw);
+warn Data::Dumper::Dumper($nolocalq->pattern);
+is_deeply($nolocalrw, $nolocalq->pattern, "Query with no locals ok");
+
+
 
 my $aremote =<<'EOQ';
 PREFIX dbo: <http://dbpedia.org/ontology/>
@@ -121,3 +128,4 @@ WHERE {
 }
 EOQ
 
+done_testing;
