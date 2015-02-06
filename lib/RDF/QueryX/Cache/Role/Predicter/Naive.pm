@@ -181,7 +181,7 @@ sub translate {
 		}
 		if (scalar @remote > 0) {
 			push(@all, RDF::Query::Algebra::Service->new(RDF::Query::Node::Resource->new($self->remoteendpoint),
-																		RDF::Query::Algebra::BasicGraphPattern->new(@remote)));
+																		RDF::Query::Algebra::GroupGraphPattern->new(RDF::Query::Algebra::BasicGraphPattern->new(@remote))));
 		}
 		return @all;
 	}  elsif ($a->isa('RDF::Trine::Statement')) {
