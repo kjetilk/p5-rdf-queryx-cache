@@ -184,41 +184,32 @@ sub translate {
 																		RDF::Query::Algebra::BasicGraphPattern->new(@remote)));
 		}
 		return @all;
-	}  elsif ($a->isa('RDF::Query::Algebra::Triple')) {
+	}  elsif ($a->isa('RDF::Trine::Statement')) {
 		return $a;
-	} elsif ($a->isa('RDF::Query::Node::Variable')) {
-		return $a;
-	} elsif ($a->isa('RDF::Query::Node::Resource')) {
-		return $a;
-	} elsif ($a->isa('RDF::Query::Node::Blank')) {
-		return $a;
-	} elsif ($a->isa('RDF::Query::Node::Literal')) {
+	} elsif ($a->isa('RDF::Query::Node')) {
 		return $a;
 	} elsif ($a->isa('RDF::Query::Algebra::Limit')) {
-		return $a;
+		return $a; # TODO: Support rewrite
 	} elsif ($a->isa('RDF::Query::Algebra::Offset')) {
-		return $a;
+		return $a; # TODO: Support rewrite
 	} elsif ($a->isa('RDF::Query::Algebra::Path')) {
-		return $a;
-	} elsif ($a->isa('RDF::Query::Algebra::NamedGraph')) {
-#		my $graph       = $self->translate($a->graph);
-#		my $p           = $self->translate($a->pattern);
-#		return Attean::Algebra::Graph->new( children => [$p], graph => $graph );
-		return $a;
+		return $a; # TODO: Support rewrite
 	} elsif ($a->isa('RDF::Query::Algebra::Filter')) {
 		my $p           = $self->translate($a->pattern);
 		return RDF::Query::Algebra::Filter->new($a->expr, $p);
-	} elsif ($a->isa('RDF::Query::Expression::Binary')) {
+	} elsif ($a->isa('RDF::Query::Expression')) {
 		return $a;
-	} elsif ($a->isa('RDF::Query::Expression::Unary')) {
-		return $a;
-	} elsif ($a->isa('RDF::Query::Algebra::Extend')) {
-		return $a;
+		# TODO: Treat expressions to support EXISTS
+	# } elsif ($a->isa('RDF::Query::Expression::Binary')) {
+	# 	return $a;
+	# } elsif ($a->isa('RDF::Query::Expression::Unary')) {
+	# 	return $a;
 	} elsif ($a->isa('RDF::Query::VariableBindings')) {
 		return $a;
 	} elsif ($a->isa('RDF::Query::Algebra::Table')) {
 		return $a;
 	} elsif ($a->isa('RDF::Query::Algebra::Aggregate')) {
+		# TODO: Support rewrite
 		# my $p           = $self->translate($a->pattern);
 		# my @group;
 		# foreach my $g ($a->groupby) {
@@ -256,6 +247,7 @@ sub translate {
 		# 											 );
 		return $a;
 	} elsif ($a->isa('RDF::Query::Algebra::Sort')) {
+		# TODO: Support rewrite
 		# my $p           = $self->translate($a->pattern);
 		# my @order       = $a->orderby;
 		# my @cmps;
@@ -267,21 +259,17 @@ sub translate {
 		# }
 		# return Attean::Algebra::OrderBy->new( children => [$p], comparators => \@cmps );
 		return $a;
-	# } elsif ($a->isa('RDF::Query::Algebra::Distinct')) {
-	# 	my $p           = $self->translate($a->pattern);
-	# 	return Attean::Algebra::Distinct->new( children => [$p] );
-	# } elsif ($a->isa('RDF::Query::Algebra::Minus')) {
-	# 	my $p           = $self->translate($a->pattern);
-	# 	my $m           = $self->translate($a->minus);
-	# 	return Attean::Algebra::Minus->new( children => [$p, $m] );
-	# } elsif ($a->isa('RDF::Query::Algebra::Union')) {
-	# 	my @p           = map { $self->translate($_) } $a->patterns;
-	# 	return Attean::Algebra::Union->new( children => \@p );
-	# } elsif ($a->isa('RDF::Query::Algebra::Optional')) {
-	# 	my $p           = $self->translate($a->pattern);
-	# 	my $o           = $self->translate($a->optional);
-	# 	return Attean::Algebra::LeftJoin->new( children => [$p, $o] );
-	# } elsif ($a->isa('RDF::Query::Algebra::SubSelect')) {
+	} elsif ($a->isa('RDF::Query::Algebra::Distinct')
+				|| $a->isa('RDF::Query::Algebra::Minus')
+				|| $a->isa('RDF::Query::Algebra::Union')
+				|| $a->isa('RDF::Query::Algebra::Optional')
+				|| $a->isa('RDF::Query::Algebra::NamedGraph')
+				|| $a->isa('RDF::Query::Algebra::Extend')) {
+	#	$self->translate($a->pattern
+	#	return map { $self->translate($_) } $a->construct_args;
+		return ref($a)->new(map { $self->translate($_) } $a->construct_args);
+	} # elsif ($a->isa('RDF::Query::Algebra::SubSelect')) {
+		# TODO: Support rewrite
 	# 	my $q   = $a->query;
 	# 	my $p   = $self->translate_query($q);
 	# 	return $p;
@@ -321,8 +309,9 @@ sub translate {
 	# 		}
 	# 	}
 	# 	warn "Unrecognized function: " . Dumper($uri, \@args);
+	else {
+		Carp::confess "Unrecognized algebra " . ref($a);
 	}
-	Carp::confess "Unrecognized algebra " . ref($a);
 }
 
 
