@@ -195,6 +195,7 @@ sub translate {
 	} elsif ($a->isa('RDF::Query::Algebra::Path')) {
 		return $a; # TODO: Support rewrite
 	} elsif ($a->isa('RDF::Query::Algebra::Filter')) {
+		# TODO: Filters must be moved to their correct BGP
 		my $p           = $self->translate($a->pattern);
 		return RDF::Query::Algebra::Filter->new($a->expr, $p);
 	} elsif ($a->isa('RDF::Query::Expression')) {
@@ -268,47 +269,9 @@ sub translate {
 	#	$self->translate($a->pattern
 	#	return map { $self->translate($_) } $a->construct_args;
 		return ref($a)->new(map { $self->translate($_) } $a->construct_args);
-	} # elsif ($a->isa('RDF::Query::Algebra::SubSelect')) {
-		# TODO: Support rewrite
-	# 	my $q   = $a->query;
-	# 	my $p   = $self->translate_query($q);
-	# 	return $p;
-	# } elsif ($a->isa('RDF::Query::Expression::Function')) {
-	# 	my $uri         = $a->uri->uri_value;
-	# 	my @args        = map { $self->translate_expr($_) } $a->arguments;
-	# 	if ($uri eq 'sparql:logical-and') {
-	# 		my $algebra     = Attean::BinaryExpression->new( operator => '&&', children => [splice(@args, 0, 2)] );
-	# 		while (scalar(@args)) {
-	# 			$algebra        = Attean::BinaryExpression->new( operator => '&&', children => [$algebra, shift(@args)] );
-	# 		}
-	# 		return $algebra;
-	# 	} elsif ($uri eq 'sparql:logical-or') {
-	# 		my $algebra     = Attean::BinaryExpression->new( operator => '||', children => [splice(@args, 0, 2)] );
-	# 		while (scalar(@args)) {
-	# 			$algebra        = Attean::BinaryExpression->new( operator => '||', children => [$algebra, shift(@args)] );
-	# 		}
-	# 		return $algebra;
-	# 	} elsif ($uri =~ /^sparql:(.+)$/) {
-	# 		if ($1 eq 'exists') {
-	# 			# re-translate the pattern as a pattern, not an expression:
-	# 			my ($p) = map { $self->translate_pattern($_) } $a->arguments;
-	# 			return Attean::ExistsExpression->new( pattern => $p );
-	# 		} else {
-	# 			return Attean::FunctionExpression->new( children => \@args, operator => $1, ($self->has_base ? (base => $self->base) : ()) );
-	# 		}
-	# 	} elsif ($uri =~ m<^http://www[.]w3[.]org/2001/XMLSchema#(?<cast>integer|decimal|float|double|string|boolean|dateTime)$>) {
-	# 		my $cast        = $+{cast};
-	# 		if ($cast =~ /^(?:integer|decimal|float|double)$/) {
-	# 			return Attean::CastExpression->new( children => \@args, datatype => iri($uri) );
-	# 		} elsif ($cast eq 'string') {
-	# 			return Attean::FunctionExpression->new( children => \@args, operator => 'STR', ($self->has_base ? (base => $self->base) : ()) );
-	# 		} elsif ($cast eq 'boolean') {
-				
-	# 		} elsif ($cast eq 'dateTime') {
-				
-	# 		}
-	# 	}
-	# 	warn "Unrecognized function: " . Dumper($uri, \@args);
+	} #elsif ($a->isa('RDF::Query::Algebra::SubSelect')) {
+		# TODO: Support rewrite; hard right now for the lack of feeding algebra back to query constructor
+	   # return RDF::Query->new($self->translate($a->query->patterns));
 	else {
 		Carp::confess "Unrecognized algebra " . ref($a);
 	}
