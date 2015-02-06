@@ -188,12 +188,12 @@ sub translate {
 		return $a;
 	} elsif ($a->isa('RDF::Query::Node')) {
 		return $a;
-	} elsif ($a->isa('RDF::Query::Algebra::Limit')) {
-		return $a; # TODO: Support rewrite
-	} elsif ($a->isa('RDF::Query::Algebra::Offset')) {
-		return $a; # TODO: Support rewrite
-	} elsif ($a->isa('RDF::Query::Algebra::Path')) {
-		return $a; # TODO: Support rewrite
+#	} elsif ($a->isa('RDF::Query::Algebra::Limit')) {
+#		return $a; # TODO: Support rewrite
+#	} elsif ($a->isa('RDF::Query::Algebra::Offset')) {
+#		return $a; # TODO: Support rewrite
+#	} elsif ($a->isa('RDF::Query::Algebra::Path')) {
+#		return $a; # TODO: Support rewrite
 	} elsif ($a->isa('RDF::Query::Algebra::Filter')) {
 		# TODO: Filters must be moved to their correct BGP
 		my $p           = $self->translate($a->pattern);
@@ -209,7 +209,7 @@ sub translate {
 		return $a;
 	} elsif ($a->isa('RDF::Query::Algebra::Table')) {
 		return $a;
-	} elsif ($a->isa('RDF::Query::Algebra::Aggregate')) {
+#	} elsif ($a->isa('RDF::Query::Algebra::Aggregate')) {
 		# TODO: Support rewrite
 		# my $p           = $self->translate($a->pattern);
 		# my @group;
@@ -246,8 +246,8 @@ sub translate {
 		# 											  groupby         => \@group,
 		# 											  aggregates      => \@aggs,
 		# 											 );
-		return $a;
-	} elsif ($a->isa('RDF::Query::Algebra::Sort')) {
+#		return $a;
+#	} elsif ($a->isa('RDF::Query::Algebra::Sort')) {
 		# TODO: Support rewrite
 		# my $p           = $self->translate($a->pattern);
 		# my @order       = $a->orderby;
@@ -259,7 +259,7 @@ sub translate {
 		# 	push(@cmps, Attean::Algebra::Comparator->new(ascending => $asc, expression => $expr));
 		# }
 		# return Attean::Algebra::OrderBy->new( children => [$p], comparators => \@cmps );
-		return $a;
+#		return $a;
 	} elsif ($a->isa('RDF::Query::Algebra::Distinct')
 				|| $a->isa('RDF::Query::Algebra::Minus')
 				|| $a->isa('RDF::Query::Algebra::Union')
@@ -271,7 +271,7 @@ sub translate {
 		# TODO: Support rewrite; hard right now for the lack of feeding algebra back to query constructor
 	   # return RDF::Query->new($self->translate($a->query->patterns));
 	else {
-		Carp::confess "Unrecognized algebra " . ref($a);
+c		Carp::confess "Unrecognized algebra " . ref($a);
 	}
 }
 
