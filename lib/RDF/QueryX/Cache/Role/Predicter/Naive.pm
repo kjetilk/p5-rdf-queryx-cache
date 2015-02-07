@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Moo::Role;
-use Types::Standard qw(Int);
+use Types::Standard qw(Int HashRef);
 
 use RDF::Query;
 use RDF::Query::Algebra qw(bgp triple);
@@ -146,8 +146,7 @@ sub digest {
 
 sub rewrite {
 	my $self = shift;
-	my $newquery = $self->query;
-	return $self->translate($newquery->pattern);
+	return RDF::Query->new($self->translate($self->query->pattern));
 }
 
 sub translate {
@@ -196,8 +195,12 @@ sub translate {
 #		return $a; # TODO: Support rewrite
 	} elsif ($a->isa('RDF::Query::Algebra::Filter')) {
 		# TODO: Filters must be moved to their correct BGP
-		my $p           = $self->translate($a->pattern);
-		return RDF::Query::Algebra::Filter->new($a->expr, $p);
+#		if ($a->pattern->isa('RDF::Query::Algebra::GroupGraphPattern')) {
+		 	
+#		} else {
+			my $p = $self->translate($a->pattern);
+			return RDF::Query::Algebra::Filter->new($a->expr, $p);
+#		}
 	} elsif ($a->isa('RDF::Query::Expression')) {
 		return $a;
 		# TODO: Treat expressions to support EXISTS
@@ -271,10 +274,11 @@ sub translate {
 		# TODO: Support rewrite; hard right now for the lack of feeding algebra back to query constructor
 	   # return RDF::Query->new($self->translate($a->query->patterns));
 	else {
-c		Carp::confess "Unrecognized algebra " . ref($a);
+		Carp::confess "Unrecognized algebra " . ref($a);
 	}
 }
 
+has _filters => (is => 'rw', isa => HashRef);
 
 1;
 

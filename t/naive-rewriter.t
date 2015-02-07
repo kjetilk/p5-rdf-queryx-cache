@@ -32,6 +32,7 @@ use RDF::Query;
 use RDF::Trine qw(statement iri variable);
 use URI;
 use URI::Escape::XS qw/uri_unescape/;
+use Data::Dumper;
 
 my $redis_server;
 eval {
@@ -66,14 +67,17 @@ my %baseconfig = (
 					  );
 
 note "Setting up and basic tests";
-my $naive = Tmp::Test->new(query => RDF::Query->new($basequery), %baseconfig);
+
+my $q = RDF::Query->new($basequery, lang=>'sparql11');
+warn Dumper($q->pattern);
+my $naive = Tmp::Test->new(query => $q, %baseconfig);
 
 can_ok('RDF::QueryX::Cache::Role::Predicter::Naive', 'analyze');
 
 note "Testing query 1";
 
 my $nolocalrw = $naive->rewrite;
-isa_ok($nolocalrw, 'RDF::Query::Algebra');
+isa_ok($nolocalrw, 'RDF::Query');
 
 my $nolocal =<<'EOQ';
 PREFIX dbo: <http://dbpedia.org/ontology/>
@@ -108,7 +112,7 @@ $naive->cache->set($aremotekey, '1');
 
 
 my $aremoterw = $naive->rewrite;
-isa_ok($aremoterw, 'RDF::Query::Algebra');
+isa_ok($aremoterw, 'RDF::Query');
 
 
 my $aremote =<<'EOQ';
@@ -142,7 +146,7 @@ $naive->cache->remove($aremotekey);
 $naive->cache->set($popremotekey, '1');
 
 my $popremoterw = $naive->rewrite;
-isa_ok($popremoterw, 'RDF::Query::Algebra');
+isa_ok($popremoterw, 'RDF::Query');
 
 my $popremote =<<'EOQ';
 PREFIX dbo: <http://dbpedia.org/ontology/>
@@ -159,6 +163,8 @@ WHERE {
 }
 EOQ
 
+warn Dumper(RDF::Query->new($popremote));
+warn Dumper($popremoterw);
 $popremote = RDF::Query->new($popremote)->pattern->as_sparql;
 warn "One remote Have\n" . $popremote;
 warn "One remote Got\n" . $popremoterw->as_sparql;
