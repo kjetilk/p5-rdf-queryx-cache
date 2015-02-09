@@ -196,7 +196,6 @@ sub translate {
 	} elsif ($a->isa('RDF::Query::Algebra::Filter')) {
 		# TODO: Filters must be moved to their correct BGP
 #		if ($a->pattern->isa('RDF::Query::Algebra::GroupGraphPattern')) {
-		 	
 #		} else {
 			my $p = $self->translate($a->pattern);
 			return RDF::Query::Algebra::Filter->new($a->expr, $p);
