@@ -146,20 +146,20 @@ sub digest {
 
 sub rewrite {
 	my $self = shift;
-	return RDF::Query->new($self->translate($self->query->pattern));
+	return RDF::Query->new($self->_translate($self->query->pattern));
 }
 
-sub translate {
+sub _translate {
 	my ($self, $a) = @_;
 	Carp::confess "Not a reference? " . Dumper($a) unless blessed($a);
 	if ($a->isa('RDF::Query::Algebra::Construct')) {
-		return RDF::Query::Algebra::Construct->new($self->translate($a->pattern), $a->triples);
+		return RDF::Query::Algebra::Construct->new($self->_translate($a->pattern), $a->triples);
 	} elsif ($a->isa('RDF::Query::Algebra::Project')) {
 		return $a;
 	} elsif ($a->isa('RDF::Query::Algebra::GroupGraphPattern')) {
 		my $ggp = RDF::Query::Algebra::GroupGraphPattern->new;
 		foreach my $p ($a->patterns) {
-			my @tps = $self->translate($p);
+			my @tps = $self->_translate($p);
 			map { $ggp->add_pattern($_) } @tps;
 		}
 		return $ggp;
@@ -197,7 +197,7 @@ sub translate {
 		# TODO: Filters must be moved to their correct BGP
 #		if ($a->pattern->isa('RDF::Query::Algebra::GroupGraphPattern')) {
 #		} else {
-			my $p = $self->translate($a->pattern);
+			my $p = $self->_translate($a->pattern);
 			return RDF::Query::Algebra::Filter->new($a->expr, $p);
 #		}
 	} elsif ($a->isa('RDF::Query::Expression')) {
@@ -213,17 +213,17 @@ sub translate {
 		return $a;
 #	} elsif ($a->isa('RDF::Query::Algebra::Aggregate')) {
 		# TODO: Support rewrite
-		# my $p           = $self->translate($a->pattern);
+		# my $p           = $self->_translate($a->pattern);
 		# my @group;
 		# foreach my $g ($a->groupby) {
 		# 	if ($g->isa('RDF::Query::Expression::Alias')) {
-		# 		my $var         = $self->translate($g->alias);
-		# 		my $varexpr     = $self->translate_expr($g->alias);
+		# 		my $var         = $self->_translate($g->alias);
+		# 		my $varexpr     = $self->_translate_expr($g->alias);
 		# 		push(@group, $varexpr);
-		# 		my $expr        = $self->translate_expr( $g->expression );
+		# 		my $expr        = $self->_translate_expr( $g->expression );
 		# 		$p      = Attean::Algebra::Extend->new( children => [$p], variable => $var, expression => $expr );
 		# 	} else {
-		# 		push(@group, $self->translate_expr($g));
+		# 		push(@group, $self->_translate_expr($g));
 		# 	}
 		# }
 		# my @ops         = $a->ops;
@@ -231,7 +231,7 @@ sub translate {
 		# my @aggs;
 		# foreach my $o (@ops) {
 		# 	my ($str, $op, $scalar_vars, @vars)     = @$o;
-		# 	my $operands    = [map { $self->translate_expr($_) } grep { blessed($_) } @vars];
+		# 	my $operands    = [map { $self->_translate_expr($_) } grep { blessed($_) } @vars];
 		# 	my $distinct    = ($op =~ /-DISTINCT$/);
 		# 	$op                             =~ s/-DISTINCT$//;
 		# 	my $expr        = Attean::AggregateExpression->new(
@@ -251,13 +251,13 @@ sub translate {
 #		return $a;
 #	} elsif ($a->isa('RDF::Query::Algebra::Sort')) {
 		# TODO: Support rewrite
-		# my $p           = $self->translate($a->pattern);
+		# my $p           = $self->_translate($a->pattern);
 		# my @order       = $a->orderby;
 		# my @cmps;
 		# foreach my $o (@order) {
 		# 	my ($dir, $e)   = @$o;
 		# 	my $asc                         = ($dir eq 'ASC');
-		# 	my $expr                        = $self->translate_expr($e);
+		# 	my $expr                        = $self->_translate_expr($e);
 		# 	push(@cmps, Attean::Algebra::Comparator->new(ascending => $asc, expression => $expr));
 		# }
 		# return Attean::Algebra::OrderBy->new( children => [$p], comparators => \@cmps );
@@ -268,10 +268,10 @@ sub translate {
 				|| $a->isa('RDF::Query::Algebra::Optional')
 				|| $a->isa('RDF::Query::Algebra::NamedGraph')
 				|| $a->isa('RDF::Query::Algebra::Extend')) {
-		return ref($a)->new(map { $self->translate($_) } $a->construct_args);
+		return ref($a)->new(map { $self->_translate($_) } $a->construct_args);
 	} #elsif ($a->isa('RDF::Query::Algebra::SubSelect')) {
 		# TODO: Support rewrite; hard right now for the lack of feeding algebra back to query constructor
-	   # return RDF::Query->new($self->translate($a->query->patterns));
+	   # return RDF::Query->new($self->_translate($a->query->patterns));
 	else {
 		Carp::confess "Unrecognized algebra " . ref($a);
 	}
