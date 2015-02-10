@@ -11,7 +11,7 @@
     :runtime-requirement    [ :on "CHI"^^:CpanId ];
     :runtime-requirement    [ :on "Redis::Fast"^^:CpanId ];
     :runtime-requirement    [ :on "RDF::Trine"^^:CpanId ];
-    :runtime-requirement    [ :on "RDF::Query"^^:CpanId ];
+    :runtime-requirement    [ :on "RDF::Query 2.912_01"^^:CpanId ];
     :runtime-requirement    [ :on "Types::Standard"^^:CpanId ];     
     :runtime-requirement    [ :on "Scalar::Util"^^:CpanId ]; 
     :runtime-requirement    [ :on "URI"^^:CpanId ]; 
