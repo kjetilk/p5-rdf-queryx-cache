@@ -213,54 +213,9 @@ sub _translate {
 		return $a;
 #	} elsif ($a->isa('RDF::Query::Algebra::Aggregate')) {
 		# TODO: Support rewrite
-		# my $p           = $self->_translate($a->pattern);
-		# my @group;
-		# foreach my $g ($a->groupby) {
-		# 	if ($g->isa('RDF::Query::Expression::Alias')) {
-		# 		my $var         = $self->_translate($g->alias);
-		# 		my $varexpr     = $self->_translate_expr($g->alias);
-		# 		push(@group, $varexpr);
-		# 		my $expr        = $self->_translate_expr( $g->expression );
-		# 		$p      = Attean::Algebra::Extend->new( children => [$p], variable => $var, expression => $expr );
-		# 	} else {
-		# 		push(@group, $self->_translate_expr($g));
-		# 	}
-		# }
-		# my @ops         = $a->ops;
-		
-		# my @aggs;
-		# foreach my $o (@ops) {
-		# 	my ($str, $op, $scalar_vars, @vars)     = @$o;
-		# 	my $operands    = [map { $self->_translate_expr($_) } grep { blessed($_) } @vars];
-		# 	my $distinct    = ($op =~ /-DISTINCT$/);
-		# 	$op                             =~ s/-DISTINCT$//;
-		# 	my $expr        = Attean::AggregateExpression->new(
-		# 																		distinct        => $distinct,
-		# 																		operator        => $op,
-		# 																		children        => $operands,
-		# 																		scalar_vars     => $scalar_vars,
-		# 																		variable        => variable(".$str"),
-		# 																	  );
-		# 	push(@aggs, $expr);
-		# }
-		# return Attean::Algebra::Group->new(
-		# 											  children        => [$p],
-		# 											  groupby         => \@group,
-		# 											  aggregates      => \@aggs,
-		# 											 );
 #		return $a;
 #	} elsif ($a->isa('RDF::Query::Algebra::Sort')) {
 		# TODO: Support rewrite
-		# my $p           = $self->_translate($a->pattern);
-		# my @order       = $a->orderby;
-		# my @cmps;
-		# foreach my $o (@order) {
-		# 	my ($dir, $e)   = @$o;
-		# 	my $asc                         = ($dir eq 'ASC');
-		# 	my $expr                        = $self->_translate_expr($e);
-		# 	push(@cmps, Attean::Algebra::Comparator->new(ascending => $asc, expression => $expr));
-		# }
-		# return Attean::Algebra::OrderBy->new( children => [$p], comparators => \@cmps );
 #		return $a;
 	} elsif ($a->isa('RDF::Query::Algebra::Distinct')
 				|| $a->isa('RDF::Query::Algebra::Minus')
