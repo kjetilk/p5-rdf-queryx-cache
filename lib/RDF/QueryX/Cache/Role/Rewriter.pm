@@ -1,4 +1,4 @@
-package RDF::QueryX::Cache::Role::Rewriter::Naive;
+package RDF::QueryX::Cache::Role::Rewriter;
 
 use strict;
 use warnings;

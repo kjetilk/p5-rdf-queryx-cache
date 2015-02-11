@@ -45,6 +45,7 @@ my $redis = Redis::Fast->new( $redis_server->connect_info );
 	package Tmp::Test;
 	use Moo;
 	with 'RDF::QueryX::Cache::Role::Predicter::Naive';
+	with 'RDF::QueryX::Cache::Role::Rewriter::Naive';
 }
 
 my $basequery =<<'EOQ';
