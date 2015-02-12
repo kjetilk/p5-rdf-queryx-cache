@@ -34,19 +34,13 @@ use URI;
 use URI::Escape::XS qw/uri_unescape/;
 use Data::Dumper;
 
+use_ok('RDF::QueryX::Cache::QueryProcessor');
 my $redis_server;
 eval {
 	$redis_server = Test::RedisServer->new;
 } or plan skip_all => 'redis-server is required to this test';
 
 my $redis = Redis::Fast->new( $redis_server->connect_info );
-
-{
-	package Tmp::Test;
-	use Moo;
-	with 'RDF::QueryX::Cache::Role::Predicter::Naive';
-	with 'RDF::QueryX::Cache::Role::Rewriter::Naive';
-}
 
 my $basequery =<<'EOQ';
 PREFIX dbo: <http://dbpedia.org/ontology/>
@@ -71,9 +65,10 @@ note "Setting up and basic tests";
 
 my $q = RDF::Query->new($basequery, lang=>'sparql11');
 warn Dumper($q->pattern);
-my $naive = Tmp::Test->new(query => $q, %baseconfig);
+my $naive = RDF::QueryX::Cache::QueryProcessor->new(query => $q, %baseconfig);
 
 can_ok('RDF::QueryX::Cache::Role::Predicter::Naive', 'analyze');
+can_ok('RDF::QueryX::Cache::Role::Rewriter::Naive', 'rewrite');
 
 note "Testing query 1";
 
