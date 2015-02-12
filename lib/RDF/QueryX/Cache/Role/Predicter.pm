@@ -133,6 +133,23 @@ has remotetriples => (is => 'rw',
 							 default => sub {[]});
 
 
+=item C<< local_keys >>, C<< add_local_keys >>
+
+An arrayref of keys in use for the local cache.
+
+=back
+
+=cut
+
+has local_keys => (is => 'rw',
+				 isa => ArrayRef,
+				 handles_via => 'Array',
+				 handles => {
+								 add_local_keys => 'push' 
+								},
+				 default => sub {[]});
+
+
 
 =head2 Required methods or attributes
 

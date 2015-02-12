@@ -109,18 +109,9 @@ sub analyze {
 	# TODO: Return undef if we can't process the query
 	foreach my $quad ($qo->pattern->subpatterns_of_type('RDF::Trine::Statement')) {
 		my $key = $self->digest($quad);
-
-		# First, create the patterns used to evaluate the query
-		if ($key && ($self->cache->is_valid($key))) {
-			$self->add_localtriples($quad);
-			$count++;
-		} else {
-			$self->add_remotetriples($quad);
-		}
-
 		next unless ($key);
 
-		# Then, update the storage and push an event so that the cache manager can deal with prefetches
+		# Update the storage and push an event so that the cache manager can deal with prefetches
 		$self->store->incr($key);
 		my $count = $self->store->get($key);
 		if ($count == $self->threshold) { # Fails if two clients are updating at the same time
@@ -128,6 +119,11 @@ sub analyze {
 			$self->store->publish('prefetch.queries', $self->remoteendpoint . '?query=' . uri_escape('CONSTRUCT WHERE { ' . $triple->as_sparql . ' }'));
 		}
 
+		# Save the keys of valid cache entries
+		if ($key && ($self->cache->is_valid($key))) {
+			$self->add_local_keys($key);
+			$count++;
+		}
 	}
 	return $count;
 }
