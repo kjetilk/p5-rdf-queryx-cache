@@ -28,7 +28,7 @@ sub call {
 	 my $req = Plack::Request->new($env);
 	 my $query = RDF::Query->new($req->parameters->get('query'));
 	 my $req_uri = $req->uri;
-	 my $remoteendpoint = $req_uri->scheme . '://' $req_uri->host . $req_uri->path;
+	 my $remoteendpoint = $req_uri->scheme . '://' . $req_uri->host . $req_uri->path;
 	 my $process = RDF::QueryX::Cache::QueryProcessor->new(query => $query,
 																			 remoteendpoint => $remoteendpoint,
 																			 %{$self->{baseconfig}});
