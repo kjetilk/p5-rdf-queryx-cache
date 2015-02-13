@@ -39,7 +39,8 @@ sub call {
 	 my $model = RDF::Trine::Model->temporary_model;
 	 my $parser = RDF::Trine::Parser->new( 'turtle' );
 	 foreach my $key (@{$process->local_keys}) {
-		 $parser->parse_into_model('', $process->cache->get($key), $model);
+		 my $cacheres = $process->cache->get($key);
+		 $parser->parse_into_model('', $cacheres->decoded_content, $model);
 	 }
 	 my $iter = $newquery->execute($model);
 	 my $response = Plack::Response->new;

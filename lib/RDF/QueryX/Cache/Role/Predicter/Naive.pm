@@ -115,8 +115,7 @@ sub analyze {
 		$self->store->incr($key);
 		my $count = $self->store->get($key);
 		if ($count == $self->threshold) { # Fails if two clients are updating at the same time
-			my $triple = RDF::Query::Algebra::Triple->new(variable('s'), $quad->predicate, variable('o'));
-			$self->store->publish('prefetch.queries', $self->remoteendpoint . '?query=' . uri_escape('CONSTRUCT WHERE { ' . $triple->as_sparql . ' }'));
+			$self->store->publish('prefetch.queries', $key);
 		}
 
 		# Save the keys of valid cache entries
@@ -134,7 +133,9 @@ has threshold => ( is => 'rw', isa => Int, default => sub { 3 });
 sub digest {
 	my ($self, $quad) = @_;
 	if ($quad->predicate->is_resource) {
-		return $quad->predicate->uri_value;
+		my $triple = RDF::Query::Algebra::Triple->new(variable('s'), $quad->predicate, variable('o'));
+		my $uri = URI->new($self->remoteendpoint . '?query=' . uri_escape('CONSTRUCT WHERE { ' . $triple->as_sparql . ' }'));
+		return $uri->canonical->uri_value;
 	} else {
 		return undef;
 	}
