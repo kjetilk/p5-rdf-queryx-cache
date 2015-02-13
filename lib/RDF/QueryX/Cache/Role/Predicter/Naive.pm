@@ -135,7 +135,7 @@ sub digest {
 	if ($quad->predicate->is_resource) {
 		my $triple = RDF::Query::Algebra::Triple->new(variable('s'), $quad->predicate, variable('o'));
 		my $uri = URI->new($self->remoteendpoint . '?query=' . uri_escape('CONSTRUCT WHERE { ' . $triple->as_sparql . ' }'));
-		return $uri->canonical->uri_value;
+		return $uri->canonical->as_string;
 	} else {
 		return undef;
 	}

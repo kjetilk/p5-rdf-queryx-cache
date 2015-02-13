@@ -29,8 +29,9 @@ use Redis::Fast;
 use CHI;
 use Test::RedisServer;
 use RDF::Query;
+use RDF::Trine qw(iri variable);
 use URI;
-use URI::Escape::XS qw/uri_unescape/;
+use URI::Escape::XS qw/uri_escape uri_unescape/;
 
 my $redis_server;
 eval {
@@ -100,8 +101,8 @@ $redis1->subscribe('prefetch.queries', $checkquery);
 	note "Testing analyzer";
 	is($naive->analyze, 0, 'No triples in the cache yet');
 	is($redis1->wait_for_messages(1), 0, 'Not reached threshold yet');
-	is($redis2->get('http://dbpedia.org/ontology/populationTotal'), 1, "We counted one pop");
-	is($redis2->get('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 1, "We counted one rdf:type");
+	is($redis2->get(makekey($naive, 'http://dbpedia.org/ontology/populationTotal')), 1, "We counted one pop");
+	is($redis2->get(makekey($naive, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type')), 1, "We counted one rdf:type");
 }
 
 $basequery =~ s/< 50/> 5000000/;
@@ -114,8 +115,8 @@ $basequery =~ s/< 50/> 5000000/;
 
 	is($naive->analyze, 0, 'No triples in the cache yet');
 	is($redis1->wait_for_messages(1), 0, 'Not reached threshold yet');
-	is($redis2->get('http://dbpedia.org/ontology/populationTotal'), 2, "We counted two pops");
-	is($redis2->get('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 2, "We counted two rdf:types");
+	is($redis2->get(makekey($naive, 'http://dbpedia.org/ontology/populationTotal')), 2, "We counted two pops");
+	is($redis2->get(makekey($naive, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type')), 2, "We counted two rdf:types");
 }
 
 $basequery =~ s/a dbo:PopulatedPlace/dbo:abstract ?abs/g;
@@ -128,9 +129,9 @@ $basequery =~ s/a dbo:PopulatedPlace/dbo:abstract ?abs/g;
 
 	is($naive->analyze, 0, 'No triples in the cache yet');
 	is($redis1->wait_for_messages(1), 1, 'Reached threshold for pops');
-	is($redis2->get('http://dbpedia.org/ontology/abstract'), 1, "We counted one abstract");
-	is($redis2->get('http://dbpedia.org/ontology/populationTotal'), 3, "We counted three pops");
-	is($redis2->get('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 2, "We counted two rdf:types");
+	is($redis2->get(makekey($naive, 'http://dbpedia.org/ontology/abstract')), 1, "We counted one abstract");
+	is($redis2->get(makekey($naive, 'http://dbpedia.org/ontology/populationTotal')), 3, "We counted three pops");
+	is($redis2->get(makekey($naive, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type')), 2, "We counted two rdf:types");
 }
 
 $basequery =~ s/FILTER \(\?place > 5000000\)/?place a dbo:Region ./;
@@ -143,9 +144,16 @@ $basequery =~ s/FILTER \(\?place > 5000000\)/?place a dbo:Region ./;
 
 	is($naive->analyze, 0, 'No triples in the cache yet');
 	is($redis1->wait_for_messages(1), 1, 'Reached threshold for pops and rdf:type');
-	is($redis2->get('http://dbpedia.org/ontology/abstract'), 2, "We counted two abstracts");
-	is($redis2->get('http://dbpedia.org/ontology/populationTotal'), 4, "We counted four pops");
-	is($redis2->get('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 3, "We counted three rdf:types");
+	is($redis2->get(makekey($naive, 'http://dbpedia.org/ontology/abstract')), 2, "We counted two abstracts");
+	is($redis2->get(makekey($naive, 'http://dbpedia.org/ontology/populationTotal')), 4, "We counted four pops");
+	is($redis2->get(makekey($naive, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type')), 3, "We counted three rdf:types");
+}
+
+sub makekey {
+	my ($naive, $predicate) = @_;
+	my $triple = RDF::Query::Algebra::Triple->new(variable('s'), iri($predicate), variable('o'));
+	my $uri = URI->new($naive->remoteendpoint . '?query=' . uri_escape('CONSTRUCT WHERE { ' . $triple->as_sparql . ' }'));
+	return $uri->canonical->as_string;
 }
 
 done_testing;
