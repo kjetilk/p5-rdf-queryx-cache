@@ -95,6 +95,7 @@ A L<CHI> driver to actually cache the query results.
 
 has cache => (is => 'ro',
 				  isa => InstanceOf['CHI::Driver'],
+				  required => 1
 				 );
 
 
