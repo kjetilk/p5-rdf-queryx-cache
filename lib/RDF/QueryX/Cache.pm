@@ -6,6 +6,62 @@ package RDF::QueryX::Cache;
 
 our $AUTHORITY = 'cpan:KJETILK';
 our $VERSION   = '0.001';
+use parent qw( Plack::Component );
+use Plack::Request;
+use RDF::Query;
+use RDF::Trine;
+use RDF::Trine::Parser;
+use Try::Tiny;
+use Encode;
+
+
+sub prepare_app {
+	# TODO: Use a config system
+	my $self->{baseconfig} = {
+									  cache => CHI->new( driver => 'Memory', global => 1 ),
+									  store => Redis::Fast->new()
+									 };
+}
+
+sub call {
+    my($self, $env) = @_;
+	 my $req = Plack::Request->new($env);
+	 my $query = RDF::Query->new($req->parameters->get('query'));
+	 my $req_uri = $req->uri;
+	 my $remoteendpoint = $req_uri->scheme . '://' $req_uri->host . $req_uri->path;
+	 my $process = RDF::QueryX::Cache::QueryProcessor->new(query => $query,
+																			 remoteendpoint => $remoteendpoint,
+																			 %{$self->{baseconfig}});
+	 $process->analyze; # Examine the query and schedule prefetcher
+	 my $newquery = $process->rewrite; # Rewrite with SERVICE
+
+	 # TODO: Need more efficient parsing and loading
+	 my $model = RDF::Trine::Model->temporary_model;
+	 my $parser = RDF::Trine::Parser->new( 'turtle' );
+	 foreach my $key (@{$process->local_keys}) {
+		 $parser->parse_into_model('', $process->cache->get($key), $model);
+	 }
+	 my $iter = $newquery->execute($model);
+	 my $response = Plack::Response->new;
+	 my ($ct, $s);
+	 try {
+		 ($ct, $s) = RDF::Trine::Serializer->negotiate('request_headers' => $req->headers);
+	 } catch {
+		 $response->status(406);
+		 $response->headers->content_type('text/plain');
+		 $response->body('HTTP 406: No serialization available any specified content type');
+		 return $response;
+	 };
+
+	 $response->status(200);
+	 $response->headers->header('Vary' => join(", ", qw(Accept)));
+	 my $body = $s->serialize_iterator_to_string($iter);
+	 $response->headers->content_type($ct);
+	 $response->body(encode_utf8($body));
+	 # TODO: Preserve remote host headers
+	 # TODO: Add Age, Via should probably happen here
+    return $response->finalize;
+}
 
 1;
 
@@ -26,7 +82,7 @@ RDF::QueryX::Cache - A research module to manage SPARQL query caching on a proxy
 =head1 BUGS
 
 Please report any bugs to
-L<http://rt.cpan.org/Dist/Display.html?Queue=RDF-QueryX-Cache>.
+L<https://github.com/kjetilk/p5-rdf-queryx-cache/issues>.
 
 =head1 SEE ALSO
 
