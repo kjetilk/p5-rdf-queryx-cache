@@ -33,6 +33,7 @@ sub call {
 	 my $req = Plack::Request->new($env);
 	 my $query = RDF::Query->new($req->parameters->get('query'));
 	 unless ($query) {
+		 # Just forward the whole request if no query parameter is present
 		 my $response = _forward_request($req);
 		 return $response->finalize;
 	 }
@@ -43,6 +44,7 @@ sub call {
 																			 %{$self->{baseconfig}});
 
 	 unless ($process->analyze) { # Examine the query and schedule prefetcher
+		 # but just pass the query if there is nothing in the cache
 		 my $response = _forward_request($req);
 		 return $response->finalize;
 	 }
