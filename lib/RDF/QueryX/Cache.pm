@@ -16,6 +16,8 @@ use Encode;
 use CHI;
 use Redis::Fast;
 use RDF::QueryX::Cache::QueryProcessor;
+use LWP::UserAgent;
+use Plack::Response;
 
 sub prepare_app {
 	# TODO: Use a config system
@@ -29,6 +31,16 @@ sub call {
     my($self, $env) = @_;
 	 my $req = Plack::Request->new($env);
 	 my $query = RDF::Query->new($req->parameters->get('query'));
+	 my $response = Plack::Response->new;
+	 unless ($query) {
+		 my $ua = LWP::UserAgent->new;
+		 my $fres = $ua->request(HTTP::Request->new($req->method, $req->uri, $req->headers, $req->content));
+		 # TODO: insert Via
+		 $response->status($fres->code);
+		 $response->headers($fres->headers);
+		 $response->body($fres->content);
+		 return $response->finalize;
+	 }
 	 my $req_uri = $req->uri;
 	 my $remoteendpoint = $req_uri->scheme . '://' . $req_uri->host . $req_uri->path;
 	 my $process = RDF::QueryX::Cache::QueryProcessor->new(query => $query,
@@ -45,7 +57,6 @@ sub call {
 		 $parser->parse_into_model('', $cacheres->decoded_content, $model);
 	 }
 	 my $iter = $newquery->execute($model);
-	 my $response = Plack::Response->new;
 	 my ($ct, $s);
 	 try {
 		 ($ct, $s) = RDF::Trine::Serializer->negotiate('request_headers' => $req->headers);
