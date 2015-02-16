@@ -23,9 +23,9 @@ sub prepare_app {
 	# TODO: Use a config system
 	my $self = shift;
 	$self->{baseconfig} = {
-									  cache => CHI->new( driver => 'Memory', global => 1 ),
-									  store => Redis::Fast->new()
-									 };
+								  cache => CHI->new( driver => 'Memory', global => 1 ),
+								  store => Redis::Fast->new()
+								 };
 }
 
 sub call {
