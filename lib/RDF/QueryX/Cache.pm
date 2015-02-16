@@ -5,7 +5,7 @@ use warnings;
 package RDF::QueryX::Cache;
 
 our $AUTHORITY = 'cpan:KJETILK';
-our $VERSION   = '0.001';
+our $VERSION   = '0.001_01';
 use parent qw( Plack::Component );
 use Plack::Request;
 use RDF::Query;
