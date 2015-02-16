@@ -13,7 +13,9 @@ use RDF::Trine;
 use RDF::Trine::Parser;
 use Try::Tiny;
 use Encode;
-
+use CHI;
+use Redis::Fast;
+use RDF::QueryX::Cache::QueryProcessor;
 
 sub prepare_app {
 	# TODO: Use a config system
