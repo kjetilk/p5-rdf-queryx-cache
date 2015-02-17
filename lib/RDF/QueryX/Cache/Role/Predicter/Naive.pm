@@ -12,6 +12,8 @@ use RDF::Trine qw(variable);
 use URI::Escape::XS qw/uri_escape/;
 use Scalar::Util qw(refaddr);
 use Carp;
+use Log::Log4perl ':easy';
+use Log::Contextual qw( :log ), -package_logger => Log::Log4perl->get_logger;
 
 with 'RDF::QueryX::Cache::Role::Predicter';
 
@@ -105,15 +107,17 @@ store with topic C<prefetch.queries>.
 sub analyze {
 	my $self = shift;
 	my $qo = $self->query;
-	my $count = 0;
+	my $i = 0;
 	# TODO: Return undef if we can't process the query
 	foreach my $quad ($qo->pattern->subpatterns_of_type('RDF::Trine::Statement')) {
 		my $key = $self->digest($quad);
+		log_trace {"Found key $key"};
 		next unless ($key);
 
 		# Update the storage and push an event so that the cache manager can deal with prefetches
 		$self->store->incr($key);
 		my $count = $self->store->get($key);
+		log_debug {"Count for this key in database is $count"};
 		if ($count == $self->threshold) { # Fails if two clients are updating at the same time
 			$self->store->publish('prefetch.queries', $key);
 		}
@@ -121,10 +125,10 @@ sub analyze {
 		# Save the keys of valid cache entries
 		if ($key && ($self->cache->is_valid($key))) {
 			$self->add_local_keys($key);
-			$count++;
+			$i++;
 		}
 	}
-	return $count;
+	return $i;
 }
 
 has threshold => ( is => 'rw', isa => Int, default => sub { 3 });
