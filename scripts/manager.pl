@@ -5,7 +5,7 @@ use CHI;
 use LWP::UserAgent::CHICaching;
 
 my $redis = Redis::Fast->new;
-my $ua = LWP::UserAgent::CHICaching->new(cache => CHI->new( driver => 'Memory', global => 1 ));
+my $ua = LWP::UserAgent::CHICaching->new(cache => CHI->new( driver => 'Redis', namespace =>'cache' ));
 
 $redis->subscribe('prefetch.queries', 
 						# This will cache the query response, with the URL in the message as the key
