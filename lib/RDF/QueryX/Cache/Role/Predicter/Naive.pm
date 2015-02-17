@@ -118,7 +118,7 @@ sub analyze {
 		$self->store->incr($key);
 		my $count = $self->store->get($key);
 		log_debug {"Count for this key in database is $count"};
-		if ($count == $self->threshold) { # Fails if two clients are updating at the same time
+		if ($count >= $self->threshold) { # Fails if two clients are updating at the same time
 			$self->store->publish('prefetch.queries', $key);
 		}
 

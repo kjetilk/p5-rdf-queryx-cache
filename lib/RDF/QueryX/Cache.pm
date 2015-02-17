@@ -76,7 +76,7 @@ sub call {
 	 # TODO: Need more efficient parsing and loading
 	 my $model = RDF::Trine::Model->temporary_model;
 	 my $parser = RDF::Trine::Parser->new( 'turtle' );
-	 foreach my $key (@{$process->local_keys}) {
+	 foreach my $key ($process->all_local_keys) {
 		 my $cacheres = $process->cache->get($key);
 		 $parser->parse_into_model('', $cacheres->decoded_content, $model);
 	 }
