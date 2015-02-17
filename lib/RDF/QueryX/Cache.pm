@@ -18,12 +18,27 @@ use Redis::Fast;
 use RDF::QueryX::Cache::QueryProcessor;
 use LWP::UserAgent;
 use Plack::Response;
+use Log::Log4perl ':easy';
+use Log::Contextual qw( :log ), -package_logger => Log::Log4perl->get_logger;
+
+BEGIN {
+#	if ($ENV{TEST_VERBOSE}) {
+		Log::Log4perl->easy_init( { level   => $TRACE,
+											 category => 'RDF.QueryX.Cache' 
+										  } );
+#	} else {
+#		Log::Log4perl->easy_init( { level   => $FATAL,
+#											 category => 'RDF.LinkedData' 
+#										  } );
+#	}
+	use Log::Contextual -logger => Log::Log4perl->get_logger;
+}
 
 sub prepare_app {
 	# TODO: Use a config system
 	my $self = shift;
 	$self->{baseconfig} = {
-								  cache => CHI->new( driver => 'Memory', global => 1 ),
+								  cache => CHI->new( driver => 'Redis', namespace =>'cache' ),
 								  store => Redis::Fast->new()
 								 };
 }
@@ -33,10 +48,11 @@ sub call {
 	 my $req = Plack::Request->new($env);
 	 my $query = RDF::Query->new($req->parameters->get('query'));
 	 unless ($query) {
-		 # Just forward the whole request if no query parameter is present
+		 log_debug {'No query was found as parameter, forwarding the whole request'};
 		 my $response = _forward_request($req);
 		 return $response->finalize;
 	 }
+	 log_trace{'Found query: ' . $query->as_sparql};
 	 my $req_uri = $req->uri;
 	 my $remoteendpoint = $req_uri->scheme . '://' . $req_uri->host . $req_uri->path;
 	 my $process = RDF::QueryX::Cache::QueryProcessor->new(query => $query,
@@ -44,7 +60,7 @@ sub call {
 																			 %{$self->{baseconfig}});
 
 	 unless ($process->analyze) { # Examine the query and schedule prefetcher
-		 # but just pass the query if there is nothing in the cache
+		 log_debug {'Analysis of the query found no cached patterns, forwarding the whole request'};
 		 my $response = _forward_request($req);
 		 return $response->finalize;
 	 }
@@ -53,7 +69,7 @@ sub call {
 	 try {
 		 $newquery = $process->rewrite; # Rewrite with SERVICE
 	 } catch {
-		 warn "Could not rewrite, because $_";
+		 log_info {"Could not rewrite, because $_"};
 		 my $response = _forward_request($req);
 		 return $response->finalize;
 	 }
@@ -64,6 +80,7 @@ sub call {
 		 my $cacheres = $process->cache->get($key);
 		 $parser->parse_into_model('', $cacheres->decoded_content, $model);
 	 }
+	 log_debug {'Cached data loaded'};
 	 my $iter = $newquery->execute($model);
 	 my $response = Plack::Response->new;
 	 my ($ct, $s);
@@ -83,6 +100,7 @@ sub call {
 	 $response->body(encode_utf8($body));
 	 # TODO: Preserve remote host headers
 	 # TODO: Add Age, Via should probably happen here
+	 log_debug {'Returning response'};
     return $response->finalize;
 }
 
