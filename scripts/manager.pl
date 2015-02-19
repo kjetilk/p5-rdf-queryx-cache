@@ -12,7 +12,9 @@ $redis->subscribe('prefetch.queries',
 						sub {
 							my ($message) = shift;
 							warn $message;
-							return $ua->get($message)->is_success;
+							my $res = $ua->get($message);
+							warn "RES: " . $res->content;
+							return $res->is_success;
 						}
 					  );
 

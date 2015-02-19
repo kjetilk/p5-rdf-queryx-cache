@@ -72,13 +72,14 @@ sub call {
 		 log_info {"Could not rewrite, because $_"};
 		 my $response = _forward_request($req);
 		 return $response->finalize;
-	 }
+	 };
 	 # TODO: Need more efficient parsing and loading
 	 my $model = RDF::Trine::Model->temporary_model;
 	 my $parser = RDF::Trine::Parser->new( 'turtle' );
 	 foreach my $key ($process->all_local_keys) {
 		 my $cacheres = $process->cache->get($key);
-		 $parser->parse_into_model('', $cacheres->decoded_content, $model);
+		 log_trace {'Parsing data for key ' . $key};
+		 $parser->parse_into_model('http://cache.invalid/', $cacheres->decoded_content, $model);
 	 }
 	 log_debug {'Cached data loaded'};
 	 my $iter = $newquery->execute($model);

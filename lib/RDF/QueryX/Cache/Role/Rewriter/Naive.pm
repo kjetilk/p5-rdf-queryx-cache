@@ -12,6 +12,8 @@ use RDF::Trine qw(variable);
 use URI::Escape::XS qw/uri_escape/;
 use Scalar::Util qw(refaddr);
 use Carp;
+use Log::Log4perl ':easy';
+use Log::Contextual qw( :log ), -package_logger => Log::Log4perl->get_logger;
 
 with 'RDF::QueryX::Cache::Role::Rewriter';
 with 'RDF::QueryX::Cache::Role::Predicter';
@@ -77,7 +79,9 @@ Moose-style constructor function.
 
 sub rewrite {
 	my $self = shift;
-	return RDF::Query->new($self->_translate($self->query->pattern));
+	my $algebra = $self->_translate($self->query->pattern);
+	log_debug { 'Rewritten to ' . $algebra->as_sparql };
+	return RDF::Query->new($algebra);
 }
 
 sub _translate {
@@ -100,8 +104,10 @@ sub _translate {
 		foreach my $t ($a->triples) {
 			my $key = $self->digest($t);
 			if ($key && ($self->cache->is_valid($key))) {
+				log_trace { 'Predicate ' . $t->predicate->as_string . ' found locally'};
 				push (@local, $t);
 			} else {
+				log_trace { 'Predicate ' . $t->predicate->as_string . ' not found'};
 				push(@remote, $t);
 			}
 		}

@@ -99,7 +99,7 @@ has cache => (is => 'ro',
 				 );
 
 
-=item C<< localtriples >>, C<< add_localtriples >>, C<< count_localtriples >>, C<< all_localtriples >>
+=item C<< localtriples >>, C<< add_localtriples >>
 
 An arrayref of triple patterns that have fresh results the local
 cache.
@@ -111,8 +111,6 @@ has localtriples => (is => 'rw',
 							handles_via => 'Array',
 							handles => {
 											add_localtriples => 'push',
-											all_localtriples => 'all',
-											count_localtriples => 'count'
 										  },
 							default => sub {[]});
 
@@ -136,7 +134,7 @@ has remotetriples => (is => 'rw',
 							 default => sub {[]});
 
 
-=item C<< local_keys >>, C<< add_local_keys >>
+=item C<< local_keys >>, C<< add_local_keys >>, C<< count_local_keys >>, C<< all_local_keys >>
 
 An arrayref of keys in use for the local cache.
 
@@ -148,7 +146,10 @@ has local_keys => (is => 'rw',
 				 isa => ArrayRef,
 				 handles_via => 'Array',
 				 handles => {
-								 add_local_keys => 'push' 
+								 add_local_keys => 'push',
+								 all_local_keys => 'all',
+								 count_local_keys => 'count'
+
 								},
 				 default => sub {[]});
 
