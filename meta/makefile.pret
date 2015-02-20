@@ -7,6 +7,7 @@
     :test-requirement       [ :on "Test::Moose"^^:CpanId ];
     :test-requirement       [ :on "Test::RedisServer"^^:CpanId ];
     :runtime-requirement    [ :on "Moo"^^:CpanId ];
+    :runtime-requirement    [ :on "LWP::UserAgent::CHICaching"^^:CpanId ];
     :runtime-requirement    [ :on "Plack"^^:CpanId ];
     :runtime-requirement    [ :on "MooX::HandlesVia"^^:CpanId ];
     :runtime-requirement    [ :on "CHI"^^:CpanId ];
