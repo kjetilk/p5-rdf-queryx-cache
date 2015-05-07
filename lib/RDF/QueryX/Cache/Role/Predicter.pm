@@ -147,7 +147,7 @@ has local_keys => (is => 'rw',
 				 handles_via => 'Array',
 				 handles => {
 								 add_local_keys => 'push',
-								 all_local_keys => 'all',
+								 all_local_keys => 'elements',
 								 count_local_keys => 'count'
 
 								},
