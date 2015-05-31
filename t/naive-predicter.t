@@ -59,7 +59,7 @@ CONSTRUCT {
 } WHERE {
   ?place a dbo:PopulatedPlace .
   ?place dbo:populationTotal ?pop .
-  FILTER (?place < 50)
+  FILTER (?pop < 50)
 }
 EOQ
 
